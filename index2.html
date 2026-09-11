@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stok Jas Yanufa</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+  body { background: #f0f2f5; padding: 15px; color: #333; }
+  .container { max-width: 1100px; margin: auto; }
+  h1 { text-align: center; color: #2c3e50; margin-bottom: 20px; font-size: 24px; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: wrap; }
+  .tab-btn {
+    flex: 1; min-width: 90px; padding: 10px; border: none; border-radius: 8px;
+    cursor: pointer; background: #e0e0e0; font-weight: 600; font-size: 13px;
+  }
+  .tab-btn.active { background: #2c3e50; color: white; }
+  .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,.08); margin-bottom: 15px; }
+  .card h3 { margin-bottom: 15px; color: #2c3e50; }
+  .form-group { margin-bottom: 12px; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+  input, select { width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
+  input:focus, select:focus { outline: none; border-color: #2c3e50; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  button.primary {
+    background: #27ae60; color: white; border: none; padding: 14px;
+    border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; font-size: 15px;
+  }
+  button.primary:hover { background: #219150; }
+  button.orange { background: #e67e22; }
+  button.orange:hover { background: #d35400; }
+  button.danger { background: #e74c3c; }
+  button.danger:hover { background: #c0392b; }
+  button.blue { background: #3498db; }
+  button.blue:hover { background: #2980b9; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
+  th { background: #2c3e50; color: white; font-size: 12px; }
+  tr:hover td { background: #f9f9f9; }
+  .badge { padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-in { background: #d4edda; color: #155724; }
+  .badge-out { background: #f8d7da; color: #721c24; }
+  .empty { text-align: center; padding: 25px; color: #999; font-style: italic; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .msg { padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; display: none; }
+  .msg.show { display: block; }
+  .msg-success { background: #d4edda; color: #155724; border-left: 4px solid #27ae60; }
+  .msg-error { background: #f8d7da; color: #721c24; border-left: 4px solid #e74c3c; }
+  .hapus { background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; }
+  .kode-badge {
+    background: #2c3e50; color: white; padding: 3px 8px; border-radius: 5px;
+    font-family: monospace; font-size: 11px;
+  }
+  .warna-badge {
+    background: #8e44ad; color: white; padding: 3px 8px; border-radius: 5px;
+    font-family: monospace; font-size: 11px;
+  }
+  .info-baris { background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; color: #555; }
+  .info-baris strong { color: #2c3e50; }
+  .cloud-status {
+    position: fixed; top: 10px; right: 10px; padding: 8px 14px;
+    border-radius: 20px; font-size: 12px; font-weight: 600;
+    color: white; z-index: 999; transition: opacity .3s;
+  }
+  .size-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .size-item { display: flex; flex-direction: column; }
+  .size-item label { font-size: 13px; text-align: center; color: #555; margin-bottom: 4px; }
+  .size-item input { text-align: center; padding: 8px; font-size: 14px; }
+  .model-group { margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+  .model-header {
+    background: #34495e; color: white; padding: 10px 15px;
+    font-weight: 700; font-size: 15px; display: flex;
+    justify-content: space-between; align-items: center;
+  }
+  .warna-row { border-bottom: 1px solid #eee; padding: 10px; }
+  .warna-row:last-child { border-bottom: none; }
+  .warna-title { font-weight: 700; color: #8e44ad; margin-bottom: 8px; font-size: 14px; }
+  .size-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .size-chip {
+    background: #ecf0f1; border-radius: 6px; padding: 5px 10px;
+    font-size: 12px; display: flex; align-items: center; gap: 6px;
+  }
+  .size-chip b { color: #2c3e50; }
+  .size-chip span { color: #27ae60; font-weight: 700; }
+  .size-chip.habis span { color: #e74c3c; }
+  .total-row { background: #ecf0f1; padding: 8px 15px; font-weight: 700; font-size: 13px; color: #2c3e50; }
+  select.besar { font-size: 15px; }
+  .hilang { display: none; }
+  @media (max-width: 600px) {
+    .row, .row3 { grid-template-columns: 1fr; }
+    h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>👔 Stok Jas Yanufa</h1>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('stok', this)">📊 Stok</button>
+    <button class="tab-btn" onclick="showTab('masuk', this)">⬇️ Masuk</button>
+    <button class="tab-btn" onclick="showTab('keluar', this)">⬆️ Keluar</button>
+    <button class="tab-btn" onclick="showTab('riwayat', this)">📜 Riwayat</button>
+    <button class="tab-btn" onclick="showTab('setting', this)">⚙️ Setting</button>
+  </div>
+
+  <!-- ================= TAB STOK ================= -->
+  <div id="stok" class="tab-content active">
+    <div class="card">
+      <h3>➕ Tambah Model & Warna Baru</h3>
+      <div id="msgStok" class="msg"></div>
+      <div class="row">
+        <div class="form-group">
+          <label>Model</label>
+          <input type="text" id="inputModel" placeholder="Contoh: KC6" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Warna</label>
+          <input type="text" id="inputWarna" placeholder="Contoh: Hitam" autocomplete="off">
+        </div>
+      </div>
+      <button class="primary" onclick="tambahModelWarna()">➕ Tambah Model & Warna</button>
+    </div>
+
+    <div class="card">
+      <h3>📋 Stok Jas Yanufa</h3>
+      <div id="daftarStok"></div>
+    </div>
+  </div>
+
+  <!-- ================= TAB MASUK ================= -->
+  <div id="masuk" class="tab-content">
+    <div class="card">
+      <h3>⬇️ Barang Masuk (Stok Bertambah)</h3>
+      <div id="msgMasuk" class="msg"></div>
+      <div class="info-baris">
+        💡 Pilih <strong>Model</strong> & <strong>Warna</strong> → isi jumlah per ukuran → stok <strong>BERTAMBAH</strong>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>Model</label>
+          <select id="masukModel" class="besar" onchange="updateWarnaMasuk()"></select>
+        </div>
+        <div class="form-group">
+          <label>Warna</label>
+          <select id="masukWarna" class="besar"></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Jumlah per Ukuran</label>
+        <div id="masukSizes" class="size-grid"></div>
+      </div>
+      <div class="form-group">
+        <label>Keterangan (opsional)</label>
+        <input type="text" id="ketMasuk" placeholder="Pembelian supplier">
+      </div>
+      <button class="primary" onclick="prosesMasuk()">⬇️ Simpan Barang Masuk</button>
+    </div>
+  </div>
+
+  <!-- ================= TAB KELUAR ================= -->
+  <div id="keluar" class="tab-content">
+    <div class="card">
+      <h3>⬆️ Barang Keluar (Stok Berkurang)</h3>
+      <div id="msgKeluar" class="msg"></div>
+      <div class="info-baris">
+        💡 Pilih <strong>Model</strong> & <strong>Warna</strong> → isi jumlah per ukuran → stok <strong>BERKURANG</strong>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>Model</label>
+          <select id="keluarModel" class="besar" onchange="updateWarnaKeluar()"></select>
+        </div>
+        <div class="form-group">
+          <label>Warna</label>
+          <select id="keluarWarna" class="besar"></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Jumlah per Ukuran</label>
+        <div id="keluarSizes" class="size-grid"></div>
+      </div>
+      <div class="form-group">
+        <label>Keterangan (opsional)</label>
+        <input type="text" id="ketKeluar" placeholder="Penjualan">
+      </div>
+      <button class="primary orange" onclick="prosesKeluar()">⬆️ Simpan Barang Keluar</button>
+    </div>
+  </div>
+
+  <!-- ================= TAB RIWAYAT ================= -->
+  <div id="riwayat" class="tab-content">
+    <div class="card">
+      <h3>📜 Riwayat Transaksi</h3>
+      <table>
+        <thead><tr><th>Waktu</th><th>Model</th><th>Warna</th><th>Ukuran</th><th>Jenis</th><th>Qty</th></tr></thead>
+        <tbody id="tabelRiwayat"></tbody>
+      </table>
+      <button class="primary danger" style="margin-top:15px;" onclick="hapusRiwayat()">🗑️ Hapus Semua Riwayat</button>
+    </div>
+  </div>
+
+  <!-- ================= TAB SETTING ================= -->
+  <div id="setting" class="tab-content">
+    <div class="card">
+      <h3>⚙️ Pengaturan Ukuran</h3>
+      <div id="msgUkuran" class="msg"></div>
+      <div class="info-baris">
+        Ukuran standar: <strong id="daftarUkuran"></strong>
+      </div>
+      <div class="form-group">
+        <label>Ubah Daftar Ukuran (pisahkan dengan koma)</label>
+        <input type="text" id="inputUkuran" placeholder="S, M, L, XL, XXL, 3XL, 4XL">
+      </div>
+      <button class="primary blue" onclick="simpanUkuran()">💾 Simpan Daftar Ukuran</button>
+    </div>
+
+    <div class="card">
+      <h3>🗑️ Hapus Model</h3>
+      <div id="msgHapusModel" class="msg"></div>
+      <div class="form-group">
+        <label>Pilih Model yang mau dihapus</label>
+        <select id="hapusModelSelect"></select>
+      </div>
+      <button class="primary danger" onclick="hapusModel()">🗑️ Hapus Model</button>
+    </div>
+
+    <div class="card">
+      <h3>💾 Backup Data</h3>
+      <button class="primary blue" style="margin-bottom:10px;" onclick="backupJSON()">📤 Download Backup (JSON)</button>
+      <button class="primary" onclick="document.getElementById('fileRestore').click()">📥 Restore dari File</button>
+      <input type="file" id="fileRestore" class="hilang" accept=".json" onchange="restoreJSON(event)">
+    </div>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// KONFIGURASI CLOUD - GANTI DENGAN MILIK ANDA
+// ==========================================
+const API_URL = 'https://script.google.com/macros/s/AKfycbwABMBGlNu3GMe2bJXqUe8xShXf-TWPLuZD8BdJl31cdL53YN3TgJNUi27kgIbrJG0lIg/exec';
+const API_TOKEN = 'SokYanufa2026RahasiaAbCXyzA';
+const SYNC_ENABLED = true;
+
+// ==========================================
+// DATA
+// ==========================================
+let ukuranList = JSON.parse(localStorage.getItem('ukuranList_v3')) || ['S','M','L','XL','XXL','3XL','4XL'];
+let stok = JSON.parse(localStorage.getItem('stok_v3')) || {};
+let riwayat = JSON.parse(localStorage.getItem('riwayat_v3')) || [];
+let syncTimer = null;
+
+// ==========================================
+// UI
+// ==========================================
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  render();
+}
+
+function showMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'msg show msg-' + type;
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+// ==========================================
+// SIMPAN (LOKAL + CLOUD)
+// ==========================================
+function simpan() {
+  localStorage.setItem('ukuranList_v3', JSON.stringify(ukuranList));
+  localStorage.setItem('stok_v3', JSON.stringify(stok));
+  localStorage.setItem('riwayat_v3', JSON.stringify(riwayat));
+
+  if (SYNC_ENABLED && navigator.onLine) {
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(kirimKeCloud, 1000);
+  }
+}
+
+async function kirimKeCloud() {
+  try {
+    updateStatusCloud('syncing');
+    const formData = new URLSearchParams();
+    formData.append('token', API_TOKEN);
+    formData.append('action', 'saveAll');
+    formData.append('data', JSON.stringify({ ukuranList, stok, riwayat }));
+
+    const res = await fetch(API_URL, { method: 'POST', body: formData });
+    const json = await res.json();
+    if (json.success) updateStatusCloud('ok');
+    else updateStatusCloud('error', json.error);
+  } catch (err) {
+    console.error('Sync gagal:', err);
+    updateStatusCloud('error', 'Koneksi gagal');
+  }
+}
+
+async function ambilDariCloud() {
+  try {
+    updateStatusCloud('syncing');
+    const url = API_URL+'?token='+encodeURIComponent(API_TOKEN)+'&action=getAll';
+    const res = await fetch(url);
+    const json = await res.json();
+
+    if (json.error) {
+      updateStatusCloud('error', json.error);
+      return;
+    }
+
+    if (json.ukuranList && json.ukuranList.length > 0) {
+      ukuranList = json.ukuranList;
+    }
+    if (json.stok && Object.keys(json.stok).length > 0) {
+      stok = json.stok;
+      riwayat = json.riwayat || [];
+      localStorage.setItem('ukuranList_v3', JSON.stringify(ukuranList));
+      localStorage.setItem('stok_v3', JSON.stringify(stok));
+      localStorage.setItem('riwayat_v3', JSON.stringify(riwayat));
+      render();
+      updateStatusCloud('ok');
+    } else if (Object.keys(stok).length > 0) {
+      await kirimKeCloud();
+    } else {
+      updateStatusCloud('ok');
+    }
+  } catch (err) {
+    console.error('Ambil data gagal:', err);
+    updateStatusCloud('error', 'Koneksi gagal');
+  }
+}
+
+function updateStatusCloud(status, pesan) {
+  let el = document.getElementById('cloudStatus');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'cloudStatus';
+    el.className = 'cloud-status';
+    document.body.appendChild(el);
+  }
+
+  const config = {
+    syncing: { bg: '#f39c12', text: '🔄 Sync...' },
+    ok:      { bg: '#27ae60', text: '☁️ Tersimpan' },
+    error:   { bg: '#e74c3c', text: '⚠️ ' + (pesan || 'Gagal sync') },
+    offline: { bg: '#95a5a6', text: '📴 Offline' }
+  };
+
+  const c = config[status] || config.offline;
+  el.style.background = c.bg;
+  el.textContent = c.text;
+  el.style.opacity = '1';
+
+  if (status === 'ok') {
+    setTimeout(() => { el.style.opacity = '0.5'; }, 2000);
+  }
+}
+
+// ==========================================
+// HELPER
+// ==========================================
+function keyOf(model, warna) {
+  return model + '||' + warna;
+}
+
+function getModelList() {
+  const set = new Set();
+  Object.values(stok).forEach(item => set.add(item.model));
+  return Array.from(set).sort();
+}
+
+function getWarnaList(model) {
+  return Object.values(stok)
+    .filter(item => item.model === model)
+    .map(item => item.warna)
+    .sort();
+}
+
+// ==========================================
+// TAMBAH MODEL & WARNA
+// ==========================================
+function tambahModelWarna() {
+  const model = document.getElementById('inputModel').value.trim().toUpperCase();
+  const warna = document.getElementById('inputWarna').value.trim();
+
+  if (!model) return showMsg('msgStok', '❌ Model tidak boleh kosong!', 'error');
+  if (!warna) return showMsg('msgStok', '❌ Warna tidak boleh kosong!', 'error');
+
+  const key = keyOf(model, warna);
+  if (stok[key]) return showMsg('msgStok', '❌ Model "' + model + '" warna "' + warna + '" sudah ada!', 'error');
+
+  stok[key] = { model, warna, sizes: {} };
+  ukuranList.forEach(u => { stok[key].sizes[u] = 0; });
+
+  simpan();
+  document.getElementById('inputModel').value = '';
+  document.getElementById('inputWarna').value = '';
+  document.getElementById('inputModel').focus();
+
+  showMsg('msgStok', '✅ ' + model + ' - ' + warna + ' berhasil ditambahkan!', 'success');
+  render();
+}
+
+function hapusModelWarna(key) {
+  const item = stok[key];
+  if (!item) return;
+  if (!confirm('Hapus "' + item.model + ' - ' + item.warna + '"?')) return;
+  delete stok[key];
+  simpan();
+  render();
+}
+
+// ==========================================
+// RENDER STOK
+// ==========================================
+function renderStokView() {
+  const el = document.getElementById('daftarStok');
+  const models = getModelList();
+
+  if (models.length === 0) {
+    el.innerHTML = '<div class="empty">Belum ada data. Tambah Model & Warna dulu di atas.</div>';
+    return;
+  }
+
+  let html = '';
+  models.forEach(model => {
+    const warnas = getWarnaList(model);
+    let totalModel = 0;
+    warnas.forEach(w => {
+      const item = stok[keyOf(model, w)];
+      if (item) {
+        ukuranList.forEach(u => { totalModel += (item.sizes[u] || 0); });
+      }
+    });
+
+    html += '<div class="model-group">';
+    html += '<div class="model-header"><span>📦 Model ' + model + '</span><span>Total: ' + totalModel + ' pcs</span></div>';
+
+    warnas.forEach(warna => {
+      const item = stok[keyOf(model, warna)];
+      if (!item) return;
+      let totalWarna = 0;
+      let chips = '';
+      ukuranList.forEach(u => {
+        const val = item.sizes[u] || 0;
+        totalWarna += val;
+        chips += '<div class="size-chip ' + (val === 0 ? 'habis' : '') + '"><b>' + u + '</b> <span>' + val + '</span></div>';
+      });
+
+      html += '<div class="warna-row">';
+      html += '<div class="warna-title">🎨 ' + warna + ' <small style="color:#999;font-weight:400;">(Total: ' + totalWarna + ')</small> <button class="hapus" style="float:right;" onclick="hapusModelWarna(\'' + keyOf(model, warna).replace(/'/g, "\\'") + '\')">Hapus</button></div>';
+      html += '<div class="size-chips">' + chips + '</div>';
+      html += '</div>';
+    });
+
+    html += '</div>';
+  });
+
+  el.innerHTML = html;
+}
+
+// ==========================================
+// RENDER RIWAYAT
+// ==========================================
+function renderRiwayat() {
+  const tb = document.getElementById('tabelRiwayat');
+  if (riwayat.length === 0) {
+    tb.innerHTML = '<tr><td colspan="6" class="empty">Belum ada transaksi.</td></tr>';
+    return;
+  }
+  tb.innerHTML = riwayat.slice(0, 200).map(r => `
+    <tr>
+      <td><small>${r.waktu}</small></td>
+      <td><span class="kode-badge">${r.model}</span></td>
+      <td><span class="warna-badge">${r.warna}</span></td>
+      <td>${r.ukuran}</td>
+      <td><span class="badge badge-${r.jenis === 'Masuk' ? 'in' : 'out'}">${r.jenis}</span></td>
+      <td><strong>${r.jenis === 'Masuk' ? '+' : '-'}${r.jumlah}</strong></td>
+    </tr>
+  `).join('');
+}
+
+// ==========================================
+// MASUK
+// ==========================================
+function updateWarnaMasuk() {
+  const model = document.getElementById('masukModel').value;
+  const selWarna = document.getElementById('masukWarna');
+  const warnas = getWarnaList(model);
+  selWarna.innerHTML = '<option value="">-- Pilih Warna --</option>' +
+    warnas.map(w => '<option value="' + w + '">' + w + '</option>').join('');
+  renderSizeInput('masukSizes', null);
+}
+
+function updateWarnaKeluar() {
+  const model = document.getElementById('keluarModel').value;
+  const selWarna = document.getElementById('keluarWarna');
+  const warnas = getWarnaList(model);
+  selWarna.innerHTML = '<option value="">-- Pilih Warna --</option>' +
+    warnas.map(w => '<option value="' + w + '">' + w + '</option>').join('');
+  renderSizeInput('keluarSizes', null);
+}
+
+document.getElementById('masukWarna')?.addEventListener('change', () => renderSizeInput('masukSizes', null));
+document.getElementById('keluarWarna')?.addEventListener('change', () => renderSizeInput('keluarSizes', null));
+
+function renderSizeInput(containerId, values) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = ukuranList.map(u => `
+    <div class="size-item">
+      <label>${u}</label>
+      <input type="number" min="0" value="${values ? (values[u] || 0) : 0}" data-size="${u}">
+    </div>
+  `).join('');
+}
+
+function ambilSizeValues(containerId) {
+  const inputs = document.querySelectorAll('#' + containerId + ' input[data-size]');
+  const result = {};
+  inputs.forEach(inp => { result[inp.dataset.size] = parseInt(inp.value) || 0; });
+  return result;
+}
+
+function prosesMasuk() {
+  const model = document.getElementById('masukModel').value;
+  const warna = document.getElementById('masukWarna').value;
+  const ket = document.getElementById('ketMasuk').value.trim();
+
+  if (!model) return showMsg('msgMasuk', '❌ Pilih Model dulu!', 'error');
+  if (!warna) return showMsg('msgMasuk', '❌ Pilih Warna dulu!', 'error');
+
+  const values = ambilSizeValues('masukSizes');
+  const total = Object.values(values).reduce((a, b) => a + b, 0);
+  if (total === 0) return showMsg('msgMasuk', '❌ Minimal isi 1 ukuran dengan jumlah > 0!', 'error');
+
+  const key = keyOf(model, warna);
+  if (!stok[key]) return showMsg('msgMasuk', '❌ Data tidak ditemukan!', 'error');
+
+  const waktu = new Date().toLocaleString('id-ID');
+  ukuranList.forEach(u => {
+    const jml = values[u] || 0;
+    if (jml > 0) {
+      stok[key].sizes[u] = (stok[key].sizes[u] || 0) + jml;
+      riwayat.unshift({ waktu, model, warna, ukuran: u, jenis: 'Masuk', jumlah: jml, ket: ket || '-' });
+    }
+  });
+
+  simpan();
+  document.getElementById('ketMasuk').value = '';
+  renderSizeInput('masukSizes', null);
+
+  showMsg('msgMasuk', '✅ ' + model + ' - ' + warna + ' +' + total + ' pcs', 'success');
+  render();
+}
+
+// ==========================================
+// KELUAR
+// ==========================================
+function prosesKeluar() {
+  const model = document.getElementById('keluarModel').value;
+  const warna = document.getElementById('keluarWarna').value;
+  const ket = document.getElementById('ketKeluar').value.trim();
+
+  if (!model) return showMsg('msgKeluar', '❌ Pilih Model dulu!', 'error');
+  if (!warna) return showMsg('msgKeluar', '❌ Pilih Warna dulu!', 'error');
+
+  const values = ambilSizeValues('keluarSizes');
+  const total = Object.values(values).reduce((a, b) => a + b, 0);
+  if (total === 0) return showMsg('msgKeluar', '❌ Minimal isi 1 ukuran dengan jumlah > 0!', 'error');
+
+  const key = keyOf(model, warna);
+  if (!stok[key]) return showMsg('msgKeluar', '❌ Data tidak ditemukan!', 'error');
+
+  // Cek stok cukup dulu
+  for (const u of ukuranList) {
+    const jml = values[u] || 0;
+    if (jml > 0) {
+      const tersedia = stok[key].sizes[u] || 0;
+      if (jml > tersedia) {
+        return showMsg('msgKeluar', '❌ Stok ' + u + ' tidak cukup! Tersedia: ' + tersedia, 'error');
+      }
+    }
+  }
+
+  const waktu = new Date().toLocaleString('id-ID');
+  ukuranList.forEach(u => {
+    const jml = values[u] || 0;
+    if (jml > 0) {
+      stok[key].sizes[u] = (stok[key].sizes[u] || 0) - jml;
+      riwayat.unshift({ waktu, model, warna, ukuran: u, jenis: 'Keluar', jumlah: jml, ket: ket || '-' });
+    }
+  });
+
+  simpan();
+  document.getElementById('ketKeluar').value = '';
+  renderSizeInput('keluarSizes', null);
+
+  showMsg('msgKeluar', '✅ ' + model + ' - ' + warna + ' -' + total + ' pcs', 'success');
+  render();
+}
+
+// ==========================================
+// SETTING
+// ==========================================
+function simpanUkuran() {
+  const input = document.getElementById('inputUkuran').value.trim();
+  if (!input) return showMsg('msgUkuran', '❌ Daftar ukuran tidak boleh kosong!', 'error');
+
+  const list = input.split(',').map(x => x.trim()).filter(x => x);
+  if (list.length === 0) return showMsg('msgUkuran', '❌ Format salah!', 'error');
+
+  if (!confirm('Ubah daftar ukuran? Data ukuran lama yang tidak ada di daftar baru akan hilang.')) return;
+
+  ukuranList = list;
+
+  // Reset size di semua item & pastikan semua ukuran ada
+  Object.values(stok).forEach(item => {
+    const newSizes = {};
+    ukuranList.forEach(u => { newSizes[u] = item.sizes[u] || 0; });
+    item.sizes = newSizes;
+  });
+
+  simpan();
+  showMsg('msgUkuran', '✅ Daftar ukuran diubah: ' + list.join(', '), 'success');
+  render();
+}
+
+function hapusModel() {
+  const model = document.getElementById('hapusModelSelect').value;
+  if (!model) return showMsg('msgHapusModel', '❌ Pilih model dulu!', 'error');
+  if (!confirm('Hapus SEMUA warna untuk model "' + model + '"?')) return;
+
+  Object.keys(stok).forEach(key => {
+    if (stok[key].model === model) delete stok[key];
+  });
+  simpan();
+  showMsg('msgHapusModel', '✅ Model ' + model + ' dihapus.', 'success');
+  render();
+}
+
+function hapusRiwayat() {
+  if (!confirm('Hapus semua riwayat?')) return;
+  riwayat = [];
+  simpan();
+  render();
+}
+
+// ==========================================
+// BACKUP / RESTORE
+// ==========================================
+function backupJSON() {
+  const data = { ukuranList, stok, riwayat, tanggal: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'backup-stok-jas-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function restoreJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.stok) throw new Error('File tidak valid');
+      if (!confirm('Restore data? Data saat ini akan digantikan.')) return;
+      ukuranList = data.ukuranList || ukuranList;
+      stok = data.stok;
+      riwayat = data.riwayat || [];
+      simpan();
+      render();
+      alert('✅ Restore berhasil!');
+    } catch (err) {
+      alert('❌ Gagal restore: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ==========================================
+// RENDER SEMUA
+// ==========================================
+function render() {
+  renderStokView();
+  renderRiwayat();
+  document.getElementById('daftarUkuran').textContent = ukuranList.join(', ');
+  document.getElementById('inputUkuran').value = ukuranList.join(', ');
+
+  // Update dropdown Model untuk MASUK
+  const models = getModelList();
+  const optModels = '<option value="">-- Pilih Model --</option>' +
+    models.map(m => '<option value="' + m + '">' + m + '</option>').join('');
+
+  const selMasukModel = document.getElementById('masukModel');
+  const selKeluarModel = document.getElementById('keluarModel');
+  const selHapusModel = document.getElementById('hapusModelSelect');
+  const vM1 = selMasukModel.value, vM2 = selKeluarModel.value, vM3 = selHapusModel.value;
+
+  selMasukModel.innerHTML = optModels;
+  selKeluarModel.innerHTML = optModels;
+  selHapusModel.innerHTML = optModels;
+
+  selMasukModel.value = vM1;
+  selKeluarModel.value = vM2;
+  selHapusModel.value = vM3;
+
+  // Kalau model berubah & tervalidasi, update warna
+  if (selMasukModel.value) updateWarnaMasuk();
+  if (selKeluarModel.value) updateWarnaKeluar();
+
+  // Pastikan size input dirender (kalau kosong)
+  if (!document.querySelector('#masukSizes input')) renderSizeInput('masukSizes', null);
+  if (!document.querySelector('#keluarSizes input')) renderSizeInput('keluarSizes', null);
+}
+
+// ==========================================
+// AUTO LOAD
+// ==========================================
+window.addEventListener('load', () => {
+  if (SYNC_ENABLED && navigator.onLine) ambilDariCloud();
+  else updateStatusCloud('offline');
+});
+
+window.addEventListener('online', () => { if (SYNC_ENABLED) ambilDariCloud(); });
+window.addEventListener('offline', () => { updateStatusCloud('offline'); });
+
+render();
+</script>
+</body>
+</html>
