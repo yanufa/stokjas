@@ -230,9 +230,16 @@
       <h3>⬇️ Barang Masuk (Stok Bertambah)</h3>
       <div id="msgMasuk" class="msg"></div>
       <div class="info-baris">
-        💡 Pilih <strong>Model</strong> & <strong>Warna</strong> → isi jumlah per ukuran → stok <strong>BERTAMBAH</strong>
+        💡 Pilih <strong>Gudang</strong> + <strong>Model</strong> + <strong>Warna</strong> → isi jumlah per ukuran
       </div>
-      <div class="row">
+      <div class="row3">
+        <div class="form-group">
+          <label>Gudang</label>
+          <select id="masukGudang" class="besar">
+            <option value="langen">🏭 Langen</option>
+            <option value="wage">🏭 Wage</option>
+          </select>
+        </div>
         <div class="form-group">
           <label>Model</label>
           <select id="masukModel" class="besar" onchange="updateWarnaMasuk()"></select>
@@ -260,9 +267,16 @@
       <h3>⬆️ Barang Keluar (Stok Berkurang)</h3>
       <div id="msgKeluar" class="msg"></div>
       <div class="info-baris">
-        💡 Pilih <strong>Model</strong> & <strong>Warna</strong> → isi jumlah per ukuran → stok <strong>BERKURANG</strong>
+        💡 Pilih <strong>Gudang</strong> + <strong>Model</strong> + <strong>Warna</strong> → isi jumlah per ukuran
       </div>
-      <div class="row">
+      <div class="row3">
+        <div class="form-group">
+          <label>Gudang</label>
+          <select id="keluarGudang" class="besar">
+            <option value="langen">🏭 Langen</option>
+            <option value="wage">🏭 Wage</option>
+          </select>
+        </div>
         <div class="form-group">
           <label>Model</label>
           <select id="keluarModel" class="besar" onchange="updateWarnaKeluar()"></select>
@@ -283,16 +297,22 @@
       <button class="primary orange" onclick="prosesKeluar()">⬆️ Simpan Barang Keluar</button>
     </div>
   </div>
-
  <!-- ================= TAB CEK FISIK ================= -->
   <div id="cekfisik" class="tab-content">
     <div class="card">
       <h3>🔍 Cek Fisik Stok (Stok Opname)</h3>
       <div class="info-baris">
-        💡 Pilih <strong>Model</strong> & <strong>Warna</strong> → ketik jumlah fisik di gudang → sistem bandingkan dengan stok aplikasi
+        💡 Pilih <strong>Gudang</strong> + <strong>Model</strong> + <strong>Warna</strong> → ketik jumlah fisik
       </div>
 
-      <div class="row">
+      <div class="row3">
+        <div class="form-group">
+          <label>Gudang</label>
+          <select id="cfGudang" class="besar" onchange="cfRenderSizeInput()">
+            <option value="langen">🏭 Langen</option>
+            <option value="wage">🏭 Wage</option>
+          </select>
+        </div>
         <div class="form-group">
           <label>Model</label>
           <select id="cfModel" class="besar" onchange="cfUpdateWarna()"></select>
@@ -318,12 +338,19 @@
   <div id="laporan" class="tab-content">
     <div class="card">
       <h3>📅 Periode Laporan</h3>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
         <button class="filter-btn" onclick="setPeriode('hari-ini', this)">Hari Ini</button>
         <button class="filter-btn active" onclick="setPeriode('7-hari', this)">7 Hari</button>
         <button class="filter-btn" onclick="setPeriode('30-hari', this)">30 Hari</button>
         <button class="filter-btn" onclick="setPeriode('semua', this)">Semua</button>
       </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; border-top:1px solid #eee; padding-top:10px;">
+        <span style="align-self:center; font-size:13px; color:#666;">Gudang:</span>
+        <button class="filter-btn active" onclick="setGudangFilter('semua', this)">📊 Semua</button>
+        <button class="filter-btn" onclick="setGudangFilter('langen', this)">🏭 Langen</button>
+        <button class="filter-btn" onclick="setGudangFilter('wage', this)">🏭 Wage</button>
+      </div>
+        
       <div id="infoPeriode" style="margin-top:10px; color:#666; font-size:13px;"></div>
     </div>
 
@@ -349,7 +376,7 @@
     <div class="card">
       <h3>📜 Riwayat Transaksi</h3>
       <table>
-        <thead><tr><th>Waktu</th><th>Model</th><th>Warna</th><th>Ukuran</th><th>Jenis</th><th>Qty</th></tr></thead>
+<thead><tr><th>Waktu</th><th>Model</th><th>Warna</th><th>Ukuran</th><th>Gudang</th><th>Jenis</th><th>Qty</th></tr></thead>
         <tbody id="tabelRiwayat"></tbody>
       </table>
       <button class="primary danger" style="margin-top:15px;" onclick="hapusRiwayat()">🗑️ Hapus Semua Riwayat</button>
@@ -405,6 +432,54 @@ let ukuranList = JSON.parse(localStorage.getItem('ukuranList_v3')) || ['S','M','
 let stok = JSON.parse(localStorage.getItem('stok_v3')) || {};
 let riwayat = JSON.parse(localStorage.getItem('riwayat_v3')) || [];
 let syncTimer = null;
+
+// ==========================================
+// GUDANG (LANGEN & WAGE)
+// ==========================================
+var GUDANG_LIST = ['langen', 'wage'];
+var GUDANG_LABEL = { langen: 'Langen', wage: 'Wage' };
+
+// Migrasi data lama: item.sizes → item.stok.langen
+(function migrasiGudang() {
+  Object.keys(stok).forEach(function(key) {
+    var item = stok[key];
+    if (!item.stok) {
+      item.stok = { langen: item.sizes || {}, wage: {} };
+      delete item.sizes;
+    }
+    if (!item.stok.langen) item.stok.langen = {};
+    if (!item.stok.wage) item.stok.wage = {};
+    ukuranList.forEach(function(u) {
+      if (typeof item.stok.langen[u] !== 'number') item.stok.langen[u] = 0;
+      if (typeof item.stok.wage[u] !== 'number') item.stok.wage[u] = 0;
+    });
+  });
+  riwayat.forEach(function(r) {
+    if (!r.gudang) r.gudang = 'langen';
+  });
+})();
+
+// Helper gudang
+function getStok(item, gudang, ukuran) {
+  if (!item || !item.stok || !item.stok[gudang]) return 0;
+  return item.stok[gudang][ukuran] || 0;
+}
+
+function setStok(item, gudang, ukuran, nilai) {
+  if (!item.stok) item.stok = { langen: {}, wage: {} };
+  if (!item.stok[gudang]) item.stok[gudang] = {};
+  item.stok[gudang][ukuran] = nilai;
+}
+
+function totalStokUkuran(item, ukuran) {
+  return getStok(item, 'langen', ukuran) + getStok(item, 'wage', ukuran);
+}
+
+function totalStokGudang(item, gudang) {
+  var t = 0;
+  ukuranList.forEach(function(u) { t += getStok(item, gudang, u); });
+  return t;
+}
 
 // ==========================================
 // UI
@@ -738,41 +813,53 @@ function renderRingkasanPerUkuran() {
   el.innerHTML = html;
 }
 function renderStokView() {
-  const el = document.getElementById('daftarStok');
-  const models = getModelList();
+  var el = document.getElementById('daftarStok');
+  var models = getModelList();
 
   if (models.length === 0) {
     el.innerHTML = '<div class="empty">Belum ada data. Tambah Model & Warna dulu di atas.</div>';
+    var banEl0 = document.getElementById('stokAlertBanner');
+    if (banEl0) banEl0.innerHTML = '';
     return;
   }
 
-  let html = '';
-  models.forEach(model => {
-    const warnas = getWarnaList(model);
-    let totalModel = 0;
-    warnas.forEach(w => {
-      const item = stok[keyOf(model, w)];
-      if (item) {
-        ukuranList.forEach(u => { totalModel += (item.sizes[u] || 0); });
-      }
+  var html = '';
+  models.forEach(function(model) {
+    var warnas = getWarnaList(model);
+    var totalModel = 0;
+    warnas.forEach(function(w) {
+      var item = stok[keyOf(model, w)];
+      if (item) totalModel += totalStokItem(item);
     });
 
     html += '<div class="model-group">';
     html += '<div class="model-header"><span>📦 Model ' + model + '</span><span>Total: ' + totalModel + ' pcs</span></div>';
 
-    warnas.forEach(warna => {
-      const item = stok[keyOf(model, warna)];
+    warnas.forEach(function(warna) {
+      var item = stok[keyOf(model, warna)];
       if (!item) return;
-      let totalWarna = 0;
-      let chips = '';
-      ukuranList.forEach(u => {
-        const val = item.sizes[u] || 0;
-        totalWarna += val;
-        chips += '<div class="size-chip ' + (val === 0 ? 'habis' : '') + '"><b>' + u + '</b> <span>' + val + '</span></div>';
+      var totalWarna = totalStokItem(item);
+      var tLangen = totalStokGudang(item, 'langen');
+      var tWage = totalStokGudang(item, 'wage');
+
+      var chips = '';
+      ukuranList.forEach(function(u) {
+        var l = getStok(item, 'langen', u);
+        var w = getStok(item, 'wage', u);
+        var total = l + w;
+        var cls = '';
+        if (total === 0) cls = 'habis';
+        else if (total <= 3) cls = 'segera';
+        else if (total <= 10) cls = 'rendah';
+
+        chips += '<div class="size-chip ' + cls + '" style="flex-direction:column; align-items:flex-start; gap:2px;">';
+        chips += '<b>' + u + '</b> <span style="color:#2c3e50; font-weight:700;">' + total + '</span>';
+        chips += '<small style="font-size:10px; color:#666;">L:' + l + ' · W:' + w + '</small>';
+        chips += '</div>';
       });
 
       html += '<div class="warna-row">';
-      html += '<div class="warna-title">🎨 ' + warna + ' <small style="color:#999;font-weight:400;">(Total: ' + totalWarna + ')</small> <button class="hapus" style="float:right;" onclick="hapusModelWarna(\'' + keyOf(model, warna).replace(/'/g, "\\'") + '\')">Hapus</button></div>';
+      html += '<div class="warna-title">🎨 ' + warna + ' <small>(Langen: ' + tLangen + ' · Wage: ' + tWage + ' · Total: ' + totalWarna + ')</small> <button class="hapus" style="float:right;" data-key="' + keyOf(model, warna) + '" onclick="hapusModelWarna(this.dataset.key)">Hapus</button></div>';
       html += '<div class="size-chips">' + chips + '</div>';
       html += '</div>';
     });
@@ -787,41 +874,44 @@ function renderStokView() {
 // RENDER RIWAYAT
 // ==========================================
 function renderRiwayat() {
-  const tb = document.getElementById('tabelRiwayat');
+  var tb = document.getElementById('tabelRiwayat');
+  if (!tb) return;
   if (riwayat.length === 0) {
-    tb.innerHTML = '<tr><td colspan="6" class="empty">Belum ada transaksi.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="7" class="empty">Belum ada transaksi.</td></tr>';
     return;
   }
-  tb.innerHTML = riwayat.slice(0, 200).map(r => `
-    <tr>
-      <td><small>${r.waktu}</small></td>
-      <td><span class="kode-badge">${r.model}</span></td>
-      <td><span class="warna-badge">${r.warna}</span></td>
-      <td>${r.ukuran}</td>
-      <td><span class="badge badge-${r.jenis === 'Masuk' ? 'in' : 'out'}">${r.jenis}</span></td>
-      <td><strong>${r.jenis === 'Masuk' ? '+' : '-'}${r.jumlah}</strong></td>
-    </tr>
-  `).join('');
+  tb.innerHTML = riwayat.slice(0, 200).map(function(r) {
+    var gudangLabel = r.gudang === 'wage' ? '🏭 Wage' : '🏭 Langen';
+    var gudangBg = r.gudang === 'wage' ? '#9b59b6' : '#3498db';
+    return '<tr>' +
+      '<td><small>' + r.waktu + '</small></td>' +
+      '<td><span class="kode-badge">' + r.model + '</span></td>' +
+      '<td><span class="warna-badge">' + r.warna + '</span></td>' +
+      '<td>' + r.ukuran + '</td>' +
+      '<td><span style="background:' + gudangBg + '; color:white; padding:2px 6px; border-radius:4px; font-size:11px;">' + gudangLabel + '</span></td>' +
+      '<td><span class="badge badge-' + (r.jenis === 'Masuk' ? 'in' : 'out') + '">' + r.jenis + '</span></td>' +
+      '<td><strong>' + (r.jenis === 'Masuk' ? '+' : '-') + r.jumlah + '</strong></td>' +
+      '</tr>';
+  }).join('');
 }
 
 // ==========================================
 // MASUK
 // ==========================================
 function updateWarnaMasuk() {
-  const model = document.getElementById('masukModel').value;
-  const selWarna = document.getElementById('masukWarna');
-  const warnas = getWarnaList(model);
+  var model = document.getElementById('masukModel').value;
+  var selWarna = document.getElementById('masukWarna');
+  var warnas = getWarnaList(model);
   selWarna.innerHTML = '<option value="">-- Pilih Warna --</option>' +
-    warnas.map(w => '<option value="' + w + '">' + w + '</option>').join('');
+    warnas.map(function(w) { return '<option value="' + w + '">' + w + '</option>'; }).join('');
   renderSizeInput('masukSizes', null);
 }
-
 function updateWarnaKeluar() {
-  const model = document.getElementById('keluarModel').value;
-  const selWarna = document.getElementById('keluarWarna');
-  const warnas = getWarnaList(model);
+  var model = document.getElementById('keluarModel').value;
+  var selWarna = document.getElementById('keluarWarna');
+  var warnas = getWarnaList(model);
   selWarna.innerHTML = '<option value="">-- Pilih Warna --</option>' +
-    warnas.map(w => '<option value="' + w + '">' + w + '</option>').join('');
+    warnas.map(function(w) { return '<option value="' + w + '">' + w + '</option>'; }).join('');
   renderSizeInput('keluarSizes', null);
 }
 
@@ -846,26 +936,29 @@ function ambilSizeValues(containerId) {
 }
 
 function prosesMasuk() {
-  const model = document.getElementById('masukModel').value;
-  const warna = document.getElementById('masukWarna').value;
-  const ket = document.getElementById('ketMasuk').value.trim();
+  var gudang = document.getElementById('masukGudang').value;
+  var model = document.getElementById('masukModel').value;
+  var warna = document.getElementById('masukWarna').value;
+  var ket = document.getElementById('ketMasuk').value.trim();
 
+  if (!gudang) return showMsg('msgMasuk', '❌ Pilih Gudang dulu!', 'error');
   if (!model) return showMsg('msgMasuk', '❌ Pilih Model dulu!', 'error');
   if (!warna) return showMsg('msgMasuk', '❌ Pilih Warna dulu!', 'error');
 
-  const values = ambilSizeValues('masukSizes');
-  const total = Object.values(values).reduce((a, b) => a + b, 0);
+  var values = ambilSizeValues('masukSizes');
+  var total = Object.values(values).reduce(function(a, b) { return a + b; }, 0);
   if (total === 0) return showMsg('msgMasuk', '❌ Minimal isi 1 ukuran dengan jumlah > 0!', 'error');
 
-  const key = keyOf(model, warna);
+  var key = keyOf(model, warna);
   if (!stok[key]) return showMsg('msgMasuk', '❌ Data tidak ditemukan!', 'error');
 
-  const waktu = new Date().toLocaleString('id-ID');
-  ukuranList.forEach(u => {
-    const jml = values[u] || 0;
+  var waktu = new Date().toLocaleString('id-ID');
+  ukuranList.forEach(function(u) {
+    var jml = values[u] || 0;
     if (jml > 0) {
-      stok[key].sizes[u] = (stok[key].sizes[u] || 0) + jml;
-      riwayat.unshift({ waktu, model, warna, ukuran: u, jenis: 'Masuk', jumlah: jml, ket: ket || '-' });
+      var current = getStok(stok[key], gudang, u);
+      setStok(stok[key], gudang, u, current + jml);
+      riwayat.unshift({ waktu: waktu, model: model, warna: warna, ukuran: u, jenis: 'Masuk', jumlah: jml, ket: ket || '-', gudang: gudang });
     }
   });
 
@@ -873,7 +966,7 @@ function prosesMasuk() {
   document.getElementById('ketMasuk').value = '';
   renderSizeInput('masukSizes', null);
 
-  showMsg('msgMasuk', '✅ ' + model + ' - ' + warna + ' +' + total + ' pcs', 'success');
+  showMsg('msgMasuk', '✅ ' + model + ' - ' + warna + ' [' + GUDANG_LABEL[gudang] + '] +' + total + ' pcs', 'success');
   render();
 }
 
@@ -881,37 +974,40 @@ function prosesMasuk() {
 // KELUAR
 // ==========================================
 function prosesKeluar() {
-  const model = document.getElementById('keluarModel').value;
-  const warna = document.getElementById('keluarWarna').value;
-  const ket = document.getElementById('ketKeluar').value.trim();
+  var gudang = document.getElementById('keluarGudang').value;
+  var model = document.getElementById('keluarModel').value;
+  var warna = document.getElementById('keluarWarna').value;
+  var ket = document.getElementById('ketKeluar').value.trim();
 
+  if (!gudang) return showMsg('msgKeluar', '❌ Pilih Gudang dulu!', 'error');
   if (!model) return showMsg('msgKeluar', '❌ Pilih Model dulu!', 'error');
   if (!warna) return showMsg('msgKeluar', '❌ Pilih Warna dulu!', 'error');
 
-  const values = ambilSizeValues('keluarSizes');
-  const total = Object.values(values).reduce((a, b) => a + b, 0);
+  var values = ambilSizeValues('keluarSizes');
+  var total = Object.values(values).reduce(function(a, b) { return a + b; }, 0);
   if (total === 0) return showMsg('msgKeluar', '❌ Minimal isi 1 ukuran dengan jumlah > 0!', 'error');
 
-  const key = keyOf(model, warna);
+  var key = keyOf(model, warna);
   if (!stok[key]) return showMsg('msgKeluar', '❌ Data tidak ditemukan!', 'error');
 
-  // Cek stok cukup dulu
-  for (const u of ukuranList) {
-    const jml = values[u] || 0;
+  for (var i = 0; i < ukuranList.length; i++) {
+    var u = ukuranList[i];
+    var jml = values[u] || 0;
     if (jml > 0) {
-      const tersedia = stok[key].sizes[u] || 0;
+      var tersedia = getStok(stok[key], gudang, u);
       if (jml > tersedia) {
-        return showMsg('msgKeluar', '❌ Stok ' + u + ' tidak cukup! Tersedia: ' + tersedia, 'error');
+        return showMsg('msgKeluar', '❌ Stok ' + u + ' di ' + GUDANG_LABEL[gudang] + ' tidak cukup! Tersedia: ' + tersedia, 'error');
       }
     }
   }
 
-  const waktu = new Date().toLocaleString('id-ID');
-  ukuranList.forEach(u => {
-    const jml = values[u] || 0;
+  var waktu = new Date().toLocaleString('id-ID');
+  ukuranList.forEach(function(u) {
+    var jml = values[u] || 0;
     if (jml > 0) {
-      stok[key].sizes[u] = (stok[key].sizes[u] || 0) - jml;
-      riwayat.unshift({ waktu, model, warna, ukuran: u, jenis: 'Keluar', jumlah: jml, ket: ket || '-' });
+      var current = getStok(stok[key], gudang, u);
+      setStok(stok[key], gudang, u, current - jml);
+      riwayat.unshift({ waktu: waktu, model: model, warna: warna, ukuran: u, jenis: 'Keluar', jumlah: jml, ket: ket || '-', gudang: gudang });
     }
   });
 
@@ -919,7 +1015,7 @@ function prosesKeluar() {
   document.getElementById('ketKeluar').value = '';
   renderSizeInput('keluarSizes', null);
 
-  showMsg('msgKeluar', '✅ ' + model + ' - ' + warna + ' -' + total + ' pcs', 'success');
+  showMsg('msgKeluar', '✅ ' + model + ' - ' + warna + ' [' + GUDANG_LABEL[gudang] + '] -' + total + ' pcs', 'success');
   render();
 }
 
@@ -1054,7 +1150,15 @@ function render() {
 // LAPORAN
 // ==========================================
 var periodeAktif = '7-hari';
+var gudangFilter = 'semua';
 
+function setGudangFilter(g, btn) {
+  gudangFilter = g;
+  var btns = btn.parentElement.querySelectorAll('.filter-btn');
+  btns.forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderLaporan();
+}
 function setPeriode(p, btn) {
   periodeAktif = p;
   document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -1088,22 +1192,27 @@ function parseWaktu(waktuStr) {
 
 function filterRiwayat() {
   var range = getRangeDate(periodeAktif);
-  if (!range) return riwayat.slice();
   var filtered = [];
   riwayat.forEach(function(r) {
-    var tgl = parseWaktu(r.waktu);
-    if (!tgl) return;
-    var t = new Date(tgl.getFullYear(), tgl.getMonth(), tgl.getDate());
-    if (t >= range.start && t <= range.end) {
-      filtered.push(r);
+    // Filter gudang
+    if (gudangFilter !== 'semua') {
+      if ((r.gudang || 'langen') !== gudangFilter) return;
     }
+    // Filter periode
+    if (range) {
+      var tgl = parseWaktu(r.waktu);
+      if (!tgl) return;
+      var t = new Date(tgl.getFullYear(), tgl.getMonth(), tgl.getDate());
+      if (t < range.start || t > range.end) return;
+    }
+    filtered.push(r);
   });
   return filtered;
 }
 
 function totalStokItem(item) {
   var t = 0;
-  ukuranList.forEach(function(u) { t += (item.sizes[u] || 0); });
+  ukuranList.forEach(function(u) { t += totalStokUkuran(item, u); });
   return t;
 }
 
@@ -1116,9 +1225,11 @@ function renderLaporan() {
 
   if (range) {
     var fmt = function(d) { return d.toLocaleDateString('id-ID'); };
-    infoEl.textContent = 'Periode: ' + fmt(range.start) + ' s/d ' + fmt(range.end) + ' — Total ' + data.length + ' transaksi';
+    var gudangLabel = gudangFilter === 'semua' ? 'Semua Gudang' : GUDANG_LABEL[gudangFilter];
+    infoEl.textContent = 'Gudang: ' + gudangLabel + ' — Periode: ' + fmt(range.start) + ' s/d ' + fmt(range.end) + ' — ' + data.length + ' transaksi';
   } else {
-    infoEl.textContent = 'Semua transaksi: ' + data.length + ' transaksi';
+    var gudangLabel2 = gudangFilter === 'semua' ? 'Semua Gudang' : GUDANG_LABEL[gudangFilter];
+    infoEl.textContent = 'Gudang: ' + gudangLabel2 + ' — Semua transaksi: ' + data.length;
   }
 
   renderLaporanProduksi(data);
@@ -1138,6 +1249,7 @@ function renderLaporanProduksi(data) {
 
   var perModel = {};
   var perHari = {};
+  var perGudang = { langen: 0, wage: 0 };
   var total = 0;
 
   masuk.forEach(function(r) {
@@ -1146,12 +1258,16 @@ function renderLaporanProduksi(data) {
     var tgl = parseWaktu(r.waktu);
     var key = tgl ? tgl.toLocaleDateString('id-ID') : '?';
     perHari[key] = (perHari[key] || 0) + r.jumlah;
+    perGudang[r.gudang || 'langen'] = (perGudang[r.gudang || 'langen'] || 0) + r.jumlah;
   });
 
   var html = '';
   html += '<div style="background:#d4edda; padding:15px; border-radius:8px; margin-bottom:15px;">';
   html += '<div style="font-size:14px; color:#155724;">Total Pcs Diproduksi:</div>';
   html += '<div style="font-size:36px; font-weight:700; color:#27ae60;">' + total + ' pcs</div>';
+  if (gudangFilter === 'semua') {
+    html += '<div style="font-size:13px; color:#155724; margin-top:5px;">🏭 Langen: <strong>' + perGudang.langen + ' pcs</strong> · 🏭 Wage: <strong>' + perGudang.wage + ' pcs</strong></div>';
+  }
   html += '</div>';
 
   html += '<h4 style="margin:15px 0 8px; color:#2c3e50;">Per Model</h4>';
@@ -1236,7 +1352,14 @@ function renderRestock() {
     var item = stok[key];
     var total = totalStokItem(item);
     if (total <= 10) {
-      items.push({ model: item.model, warna: item.warna, total: total, sizes: item.sizes });
+      items.push({
+        model: item.model,
+        warna: item.warna,
+        total: total,
+        langen: totalStokGudang(item, 'langen'),
+        wage: totalStokGudang(item, 'wage'),
+        sizes: item.stok
+      });
     }
   });
 
@@ -1248,19 +1371,19 @@ function renderRestock() {
   items.sort(function(a, b) { return a.total - b.total; });
 
   var html = '';
-  html += '<div class="info-baris">SKU dengan total stok <strong>≤ 10 pcs</strong>. Segera produksi ulang!</div>';
-  html += '<table><thead><tr><th>Model</th><th>Warna</th><th>Total</th><th>Prioritas</th><th>Detail Ukuran</th></tr></thead><tbody>';
+  html += '<div class="info-baris">SKU dengan total stok <strong>≤ 10 pcs</strong> (di 2 gudang). Segera produksi ulang!</div>';
+  html += '<table><thead><tr><th>Model</th><th>Warna</th><th>Total</th><th>Langen</th><th>Wage</th><th>Prioritas</th></tr></thead><tbody>';
 
   items.forEach(function(it) {
     var prioritas = it.total === 0 ? '🔴 HABIS' : it.total <= 5 ? '🟠 URGENT' : '🟡 Rendah';
     var bg = it.total === 0 ? 'background:#f8d7da;' : it.total <= 5 ? 'background:#fff3cd;' : '';
-    var detail = ukuranList.map(function(u) { return u + ':' + (it.sizes[u] || 0); }).join(' · ');
     html += '<tr style="' + bg + '">';
     html += '<td><span class="kode-badge">' + it.model + '</span></td>';
     html += '<td>' + it.warna + '</td>';
     html += '<td><strong>' + it.total + ' pcs</strong></td>';
+    html += '<td>' + it.langen + '</td>';
+    html += '<td>' + it.wage + '</td>';
     html += '<td>' + prioritas + '</td>';
-    html += '<td><small>' + detail + '</small></td>';
     html += '</tr>';
   });
 
@@ -1271,10 +1394,11 @@ function renderRestock() {
 function exportCSV(tipe) {
   var data = filterRiwayat();
   var rows = [];
-  rows.push(['Waktu', 'Model', 'Warna', 'Ukuran', 'Jumlah', 'Keterangan']);
+  rows.push(['Waktu', 'Model', 'Warna', 'Ukuran', 'Gudang', 'Jumlah', 'Keterangan']);
   var filterJenis = (tipe === 'produksi') ? 'Masuk' : 'Keluar';
   data.filter(function(r) { return r.jenis === filterJenis; }).forEach(function(r) {
-    rows.push([r.waktu, r.model, r.warna, r.ukuran, r.jumlah, r.ket || '']);
+    var gudangLabel = r.gudang === 'wage' ? 'Wage' : 'Langen';
+    rows.push([r.waktu, r.model, r.warna, r.ukuran, gudangLabel, r.jumlah, r.ket || '']);
   });
 
   var csv = rows.map(function(row) {
@@ -1287,7 +1411,8 @@ function exportCSV(tipe) {
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = 'laporan-' + tipe + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+  var gudangSuffix = gudangFilter === 'semua' ? 'semua' : gudangFilter;
+  a.download = 'laporan-' + tipe + '-' + gudangSuffix + '-' + new Date().toISOString().slice(0, 10) + '.csv';
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -1311,11 +1436,12 @@ function cfUpdateWarna() {
 }
 
 function cfRenderSizeInput() {
+  var gudang = document.getElementById('cfGudang').value;
   var model = document.getElementById('cfModel').value;
   var warna = document.getElementById('cfWarna').value;
   var el = document.getElementById('cfSizeTable');
 
-  if (!model || !warna) {
+  if (!gudang || !model || !warna) {
     el.innerHTML = '';
     return;
   }
@@ -1328,13 +1454,14 @@ function cfRenderSizeInput() {
   }
 
   var html = '<table class="cf-table">';
-  html += '<thead><tr><th>Ukuran</th><th>Stok Sistem</th><th>Stok Fisik</th></tr></thead><tbody>';
+  html += '<thead><tr><th>Ukuran</th><th>Sistem (' + GUDANG_LABEL[gudang] + ')</th><th>Fisik</th><th>Selisih</th></tr></thead><tbody>';
   ukuranList.forEach(function(u) {
-    var sistem = item.sizes[u] || 0;
+    var sistem = getStok(item, gudang, u);
     html += '<tr>';
     html += '<td><strong>' + u + '</strong></td>';
     html += '<td><span class="kode-badge">' + sistem + '</span></td>';
-    html += '<td><input type="number" min="0" value="' + sistem + '" data-cfsize="' + u + '"></td>';
+    html += '<td><input type="number" min="0" value="' + sistem + '" data-cfsize="' + u + '" data-sistem="' + sistem + '" oninput="cfUpdateLiveSelisih(this)"></td>';
+    html += '<td class="cf-live-selisih cf-live-ok" data-live="' + u + '">0</td>';
     html += '</tr>';
   });
   html += '</tbody></table>';
@@ -1345,26 +1472,20 @@ function cfRenderSizeInput() {
 }
 
 function cfHitungSelisih() {
+  var gudang = document.getElementById('cfGudang').value;
   var model = document.getElementById('cfModel').value;
   var warna = document.getElementById('cfWarna').value;
 
-  if (!model || !warna) {
-    alert('❌ Pilih Model & Warna dulu!');
-    return;
-  }
+  if (!gudang) { alert('❌ Pilih Gudang dulu!'); return; }
+  if (!model) { alert('❌ Pilih Model dulu!'); return; }
+  if (!warna) { alert('❌ Pilih Warna dulu!'); return; }
 
   var key = keyOf(model, warna);
   var item = stok[key];
-  if (!item) {
-    alert('❌ Data tidak ditemukan!');
-    return;
-  }
+  if (!item) { alert('❌ Data tidak ditemukan!'); return; }
 
   var inputs = document.querySelectorAll('#cfSizeTable input[data-cfsize]');
-  if (inputs.length === 0) {
-    alert('❌ Isi stok fisik dulu!');
-    return;
-  }
+  if (inputs.length === 0) { alert('❌ Isi stok fisik dulu!'); return; }
 
   var hasil = [];
   var totalSelisih = 0;
@@ -1374,17 +1495,17 @@ function cfHitungSelisih() {
   inputs.forEach(function(inp) {
     var u = inp.dataset.cfsize;
     var fisik = parseInt(inp.value) || 0;
-    var sistem = item.sizes[u] || 0;
+    var sistem = getStok(item, gudang, u);
     var selisih = fisik - sistem;
     totalSelisih += selisih;
     if (Math.abs(selisih) > maxAbs) maxAbs = Math.abs(selisih);
     if (selisih !== 0) adaMasalah = true;
-
     hasil.push({ ukuran: u, sistem: sistem, fisik: fisik, selisih: selisih });
   });
 
   cfHasilTerakhir = {
     waktu: new Date().toLocaleString('id-ID'),
+    gudang: gudang,
     model: model,
     warna: warna,
     hasil: hasil,
