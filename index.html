@@ -88,17 +88,104 @@
   .total-row { background: #ecf0f1; padding: 8px 15px; font-weight: 700; font-size: 13px; color: #2c3e50; }
   select.besar { font-size: 15px; }
   .hilang { display: none; }
+  .cf-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+  .cf-table th { background: #34495e; color: white; padding: 8px; text-align: left; font-size: 13px; }
+  .cf-table td { padding: 8px; border-bottom: 1px solid #eee; font-size: 14px; }
+  .cf-table input { width: 80px; text-align: center; padding: 6px; font-size: 14px; }
+  .cf-selisih-ok { color: #27ae60; font-weight: 700; }
+  .cf-selisih-warn { color: #f39c12; font-weight: 700; }
+  .cf-selisih-bad { color: #e74c3c; font-weight: 700; }
+  .cf-row-warn { background: #fff3cd; }
+  .cf-row-bad { background: #f8d7da; }
+  .cf-alert { padding: 15px; border-radius: 8px; margin: 12px 0; font-size: 15px; font-weight: 700; }
+  .cf-alert-ok { background: #d4edda; color: #155724; border-left: 5px solid #27ae60; }
+  .cf-alert-warn { background: #fff3cd; color: #856404; border-left: 5px solid #f39c12; }
+  .cf-alert-bad { background: #f8d7da; color: #721c24; border-left: 5px solid #e74c3c; }
+  .filter-btn {
+  padding: 8px 16px; border: 2px solid #2c3e50; background: white;
+  color: #2c3e50; border-radius: 8px; cursor: pointer;
+  font-weight: 600; font-size: 13px; transition: .2s;
+}
+.filter-btn:hover { background: #ecf0f1; }
+.filter-btn.active { background: #2c3e50; color: white; }
+  .pin-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 9999;
+  display: none; align-items: center; justify-content: center;
+}
+.pin-modal.show { display: flex; }
+.pin-box {
+  background: white; padding: 25px; border-radius: 16px;
+  max-width: 320px; width: 90%; text-align: center;
+  box-shadow: 0 10px 40px rgba(0,0,0,.3);
+}
+.pin-icon { font-size: 40px; margin-bottom: 10px; }
+.pin-title { color: #2c3e50; margin-bottom: 5px; font-size: 18px; }
+.pin-subtitle { color: #666; font-size: 13px; margin-bottom: 15px; }
+.pin-input {
+  width: 100%; padding: 15px; font-size: 24px; text-align: center;
+  letter-spacing: 12px; border: 2px solid #ccc; border-radius: 10px;
+  font-family: monospace; font-weight: 700;
+}
+.pin-input:focus { outline: none; border-color: #2c3e50; }
+.pin-error { color: #e74c3c; font-size: 13px; margin-top: 10px; min-height: 18px; font-weight: 600; }
+.pin-buttons { display: flex; gap: 8px; margin-top: 15px; }
+.pin-btn-cancel, .pin-btn-ok {
+  flex: 1; padding: 12px; border: none; border-radius: 8px;
+  font-weight: 700; cursor: pointer; font-size: 15px;
+}
+.pin-btn-cancel { background: #ecf0f1; color: #555; }
+.pin-btn-ok { background: #27ae60; color: white; }
+.pin-btn-ok:hover { background: #219150; }
+.pin-lockout { color: #e74c3c; font-size: 14px; font-weight: 700; margin-top: 10px; min-height: 20px; }
+.tabel-ukuran { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+.tabel-ukuran th {
+  background: #34495e; color: white; padding: 8px 12px;
+  text-align: left; font-size: 12px; font-weight: 700;
+}
+.tabel-ukuran td {
+  padding: 10px 12px; border-bottom: 1px solid #eee;
+  font-size: 14px; vertical-align: top;
+}
+.tabel-ukuran tr:last-child td { border-bottom: none; }
+.tabel-ukuran tr:hover td { background: #f9f9f9; }
+.tabel-ukuran .size-cell {
+  font-weight: 700; font-size: 16px; color: #2c3e50;
+  text-align: center; width: 70px;
+}
+.warna-tag {
+  display: inline-block; padding: 4px 10px; border-radius: 6px;
+  margin: 2px 4px 2px 0; font-size: 13px; font-weight: 600;
+}
+.warna-habis { background: #f8d7da; color: #721c24; }
+.warna-sisa-satu { background: #ffe0b2; color: #8a4b00; }
   @media (max-width: 600px) {
     .row, .row3 { grid-template-columns: 1fr; }
     h1 { font-size: 20px; }
   }
 </style>
+<!-- ================= MODAL PIN ================= -->
+<div id="pinModal" class="pin-modal">
+  <div class="pin-box">
+    <div class="pin-icon">🔐</div>
+    <h3 class="pin-title">Masukkan PIN</h3>
+    <p class="pin-subtitle" id="pinSubtitle">Untuk akses tab ini</p>
+    <input type="password" id="pinInput" class="pin-input" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off">
+    <div id="pinError" class="pin-error"></div>
+    <div class="pin-buttons">
+      <button class="pin-btn-cancel" onclick="tutupPIN()">Batal</button>
+      <button class="pin-btn-ok" onclick="verifikasiPIN()">Buka</button>
+    </div>
+    <div id="pinLockout" class="pin-lockout"></div>
+  </div>
+</div>
 </head>
 <body>
 <div class="container">
   <h1>👔 Stok Jas Yanufa</h1>
 
   <div class="tabs">
+  <button class="tab-btn" onclick="showTab('laporan', this)">📊 Laporan</button>
+    <button class="tab-btn" onclick="showTab('cekfisik', this)">🔍 Cek Fisik</button>
     <button class="tab-btn active" onclick="showTab('stok', this)">📊 Stok</button>
     <button class="tab-btn" onclick="showTab('masuk', this)">⬇️ Masuk</button>
     <button class="tab-btn" onclick="showTab('keluar', this)">⬆️ Keluar</button>
@@ -111,21 +198,28 @@
     <div class="card">
       <h3>➕ Tambah Model & Warna Baru</h3>
       <div id="msgStok" class="msg"></div>
-      <div class="row">
-        <div class="form-group">
-          <label>Model</label>
-          <input type="text" id="inputModel" placeholder="Contoh: KC6" autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label>Warna</label>
-          <input type="text" id="inputWarna" placeholder="Contoh: Hitam" autocomplete="off">
-        </div>
-      </div>
-      <button class="primary" onclick="tambahModelWarna()">➕ Tambah Model & Warna</button>
+  <div class="row">
+    <div class="form-group">
+      <label>Model</label>
+      <input type="text" id="inputModel" placeholder="Contoh: KC6" autocomplete="off">
     </div>
+    <div class="form-group">
+      <label>Warna</label>
+      <input type="text" id="inputWarna" placeholder="Contoh: Hitam" autocomplete="off">
+    </div>
+  </div>
+  <button class="primary" onclick="tambahModelWarna()">➕ Tambah Model & Warna</button>
+</div>
 
     <div class="card">
       <h3>📋 Stok Jas Yanufa</h3>
+      <div class="card" style="margin-bottom:15px;">
+  <h3>📏 Produksi Per Ukuran</h3>
+  <div class="info-baris">
+    💡 Cek ukuran mana yang perlu diproduksi. Cocok untuk produksi potong per ukuran.
+  </div>
+  <div id="ringkasanPerUkuran"></div>
+</div>
       <div id="daftarStok"></div>
     </div>
   </div>
@@ -190,6 +284,66 @@
     </div>
   </div>
 
+ <!-- ================= TAB CEK FISIK ================= -->
+  <div id="cekfisik" class="tab-content">
+    <div class="card">
+      <h3>🔍 Cek Fisik Stok (Stok Opname)</h3>
+      <div class="info-baris">
+        💡 Pilih <strong>Model</strong> & <strong>Warna</strong> → ketik jumlah fisik di gudang → sistem bandingkan dengan stok aplikasi
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Model</label>
+          <select id="cfModel" class="besar" onchange="cfUpdateWarna()"></select>
+        </div>
+        <div class="form-group">
+          <label>Warna</label>
+          <select id="cfWarna" class="besar" onchange="cfRenderSizeInput()"></select>
+        </div>
+      </div>
+
+      <div id="cfSizeTable"></div>
+      <div id="cfHasil"></div>
+
+      <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+        <button class="primary blue" onclick="cfHitungSelisih()" style="flex:1;">🔍 Hitung Selisih</button>
+        <button class="primary" onclick="cfReset()" style="flex:1; background:#95a5a6;">🔄 Reset</button>
+        <button class="primary blue" onclick="cfExportCSV()" style="flex:1; background:#8e44ad;">📤 Export CSV</button>
+      </div>
+    </div>
+  </div>
+
+<!-- ================= TAB LAPORAN ================= -->
+  <div id="laporan" class="tab-content">
+    <div class="card">
+      <h3>📅 Periode Laporan</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="filter-btn" onclick="setPeriode('hari-ini', this)">Hari Ini</button>
+        <button class="filter-btn active" onclick="setPeriode('7-hari', this)">7 Hari</button>
+        <button class="filter-btn" onclick="setPeriode('30-hari', this)">30 Hari</button>
+        <button class="filter-btn" onclick="setPeriode('semua', this)">Semua</button>
+      </div>
+      <div id="infoPeriode" style="margin-top:10px; color:#666; font-size:13px;"></div>
+    </div>
+
+    <div class="card">
+      <h3>🏭 Laporan Produksi (Barang Masuk)</h3>
+      <div id="laporanProduksi"></div>
+      <button class="primary blue" onclick="exportCSV('produksi')" style="margin-top:15px;">📤 Export CSV Produksi</button>
+    </div>
+
+    <div class="card">
+      <h3>💰 Laporan Penjualan (Barang Keluar)</h3>
+      <div id="laporanPenjualan"></div>
+      <button class="primary blue" onclick="exportCSV('penjualan')" style="margin-top:15px;">📤 Export CSV Penjualan</button>
+    </div>
+
+    <div class="card">
+      <h3>⚠️ Perlu Diproduksi Lagi</h3>
+      <div id="rekomendasiRestock"></div>
+    </div>
+  </div>
   <!-- ================= TAB RIWAYAT ================= -->
   <div id="riwayat" class="tab-content">
     <div class="card">
@@ -255,13 +409,106 @@ let syncTimer = null;
 // ==========================================
 // UI
 // ==========================================
+// ==========================================
+// PIN LOCK (KELUAR & CEK FISIK)
+// ==========================================
+var pinUnlocked = {};
+var pinPendingTab = null;
+var pinPendingBtn = null;
+var pinAttempts = 0;
+var pinLockUntil = 0;
+var PIN_DEFAULT = '8008';
+
+function getPIN() {
+  return localStorage.getItem('pin_stokjas_v1') || PIN_DEFAULT;
+}
+
 function showTab(id, btn) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if ((id === 'keluar' || id === 'cekfisik') && !pinUnlocked[id]) {
+    mintaPIN(id, btn);
+    return;
+  }
+  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
   render();
 }
+
+function mintaPIN(tabId, btn) {
+  var now = Date.now();
+  if (now < pinLockUntil) {
+    var sisa = Math.ceil((pinLockUntil - now) / 1000);
+    alert('⏸️ Tunggu ' + sisa + ' detik lagi karena 3x salah PIN.');
+    return;
+  }
+
+  pinPendingTab = tabId;
+  pinPendingBtn = btn;
+
+  document.getElementById('pinModal').classList.add('show');
+  var inp = document.getElementById('pinInput');
+  inp.value = '';
+  document.getElementById('pinError').textContent = '';
+  document.getElementById('pinLockout').textContent = '';
+
+  var subtitle = tabId === 'keluar' ? 'Untuk akses tab Barang Keluar' : 'Untuk akses tab Cek Fisik';
+  document.getElementById('pinSubtitle').textContent = subtitle;
+
+  setTimeout(function() { inp.focus(); }, 100);
+}
+
+function verifikasiPIN() {
+  var inp = document.getElementById('pinInput');
+  var pin = inp.value.trim();
+  var error = document.getElementById('pinError');
+
+  if (!pin) {
+    error.textContent = 'PIN tidak boleh kosong';
+    return;
+  }
+
+  if (pin === getPIN()) {
+    pinAttempts = 0;
+    pinUnlocked[pinPendingTab] = true;
+    var tabId = pinPendingTab;
+    var btn = pinPendingBtn;
+    tutupPIN();
+    if (tabId && btn) bukaTabSetelahPIN(tabId, btn);
+  } else {
+    pinAttempts++;
+    inp.value = '';
+    if (pinAttempts >= 3) {
+      pinLockUntil = Date.now() + 30000;
+      pinAttempts = 0;
+      document.getElementById('pinLockout').textContent = '🔒 Salah 3x. Tunggu 30 detik.';
+      setTimeout(tutupPIN, 2000);
+    } else {
+      error.textContent = '❌ PIN salah. Percobaan ' + pinAttempts + '/3';
+    }
+  }
+}
+
+function bukaTabSetelahPIN(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  render();
+}
+
+function tutupPIN() {
+  document.getElementById('pinModal').classList.remove('show');
+  pinPendingTab = null;
+  pinPendingBtn = null;
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinError').textContent = '';
+  document.getElementById('pinLockout').textContent = '';
+}
+
+document.getElementById('pinInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') verifikasiPIN();
+});
 
 function showMsg(id, text, type) {
   const el = document.getElementById(id);
@@ -419,6 +666,77 @@ function hapusModelWarna(key) {
 // ==========================================
 // RENDER STOK
 // ==========================================
+function renderRingkasanPerUkuran() {
+  var el = document.getElementById('ringkasanPerUkuran');
+  if (!el) return;
+
+  var models = getModelList();
+  if (models.length === 0) {
+    el.innerHTML = '<div class="empty">Belum ada data.</div>';
+    return;
+  }
+
+  var html = '';
+  var adaKritisTotal = false;
+
+  models.forEach(function(model) {
+    var perUkuran = {};
+    ukuranList.forEach(function(u) {
+      perUkuran[u] = [];
+    });
+
+    var warnas = getWarnaList(model);
+    warnas.forEach(function(w) {
+      var item = stok[keyOf(model, w)];
+      if (!item) return;
+      ukuranList.forEach(function(u) {
+        var val = item.sizes[u] || 0;
+        if (val <= 1) {
+          perUkuran[u].push({ warna: w, stok: val });
+        }
+      });
+    });
+
+    var adaKritisModel = false;
+    ukuranList.forEach(function(u) {
+      if (perUkuran[u].length > 0) adaKritisModel = true;
+    });
+
+    if (!adaKritisModel) return;
+    adaKritisTotal = true;
+
+    html += '<div style="margin-bottom:18px;">';
+    html += '<div style="font-weight:700; color:#2c3e50; margin-bottom:8px; font-size:16px;">🎯 Model ' + model + '</div>';
+    html += '<table class="tabel-ukuran"><thead><tr><th style="width:70px; text-align:center;">Size</th><th>Warna Perlu Diproduksi</th></tr></thead><tbody>';
+
+    ukuranList.forEach(function(u) {
+      var list = perUkuran[u];
+      if (list.length === 0) return;
+
+      list.sort(function(a, b) { return a.stok - b.stok; });
+
+      var tags = list.map(function(w) {
+        var cls = w.stok === 0 ? 'warna-habis' : 'warna-sisa-satu';
+        var icon = w.stok === 0 ? '🔴' : '🟠';
+        return '<span class="warna-tag ' + cls + '">' + icon + ' ' + w.warna + '</span>';
+      }).join('');
+
+      html += '<tr>';
+      html += '<td class="size-cell">' + u + '</td>';
+      html += '<td>' + tags + '</td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+  });
+
+  if (!adaKritisTotal) {
+    el.innerHTML = '<div class="empty">✅ Semua stok aman. Tidak ada yang perlu diproduksi.</div>';
+    return;
+  }
+
+  el.innerHTML = html;
+}
 function renderStokView() {
   const el = document.getElementById('daftarStok');
   const models = getModelList();
@@ -693,6 +1011,7 @@ function restoreJSON(event) {
 // ==========================================
 function render() {
   renderStokView();
+  renderRingkasanPerUkuran();
   renderRiwayat();
   document.getElementById('daftarUkuran').textContent = ukuranList.join(', ');
   document.getElementById('inputUkuran').value = ukuranList.join(', ');
@@ -702,6 +1021,13 @@ function render() {
   const optModels = '<option value="">-- Pilih Model --</option>' +
     models.map(m => '<option value="' + m + '">' + m + '</option>').join('');
 
+// Update dropdown Model untuk CEK FISIK
+  var selCfModel = document.getElementById('cfModel');
+  if (selCfModel) {
+    var vCf = selCfModel.value;
+    selCfModel.innerHTML = optModels;
+    selCfModel.value = vCf;
+  }
   const selMasukModel = document.getElementById('masukModel');
   const selKeluarModel = document.getElementById('keluarModel');
   const selHapusModel = document.getElementById('hapusModelSelect');
@@ -724,6 +1050,445 @@ function render() {
   if (!document.querySelector('#keluarSizes input')) renderSizeInput('keluarSizes', null);
 }
 
+// ==========================================
+// LAPORAN
+// ==========================================
+var periodeAktif = '7-hari';
+
+function setPeriode(p, btn) {
+  periodeAktif = p;
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderLaporan();
+}
+
+function getRangeDate(periode) {
+  var now = new Date();
+  var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var start;
+  if (periode === 'hari-ini') {
+    start = today;
+  } else if (periode === '7-hari') {
+    start = new Date(today);
+    start.setDate(start.getDate() - 6);
+  } else if (periode === '30-hari') {
+    start = new Date(today);
+    start.setDate(start.getDate() - 29);
+  } else {
+    return null;
+  }
+  return { start: start, end: now };
+}
+
+function parseWaktu(waktuStr) {
+  var parts = String(waktuStr).match(/^(\d+)\/(\d+)\/(\d+)/);
+  if (!parts) return null;
+  return new Date(parseInt(parts[3]), parseInt(parts[2]) - 1, parseInt(parts[1]));
+}
+
+function filterRiwayat() {
+  var range = getRangeDate(periodeAktif);
+  if (!range) return riwayat.slice();
+  var filtered = [];
+  riwayat.forEach(function(r) {
+    var tgl = parseWaktu(r.waktu);
+    if (!tgl) return;
+    var t = new Date(tgl.getFullYear(), tgl.getMonth(), tgl.getDate());
+    if (t >= range.start && t <= range.end) {
+      filtered.push(r);
+    }
+  });
+  return filtered;
+}
+
+function totalStokItem(item) {
+  var t = 0;
+  ukuranList.forEach(function(u) { t += (item.sizes[u] || 0); });
+  return t;
+}
+
+function renderLaporan() {
+  var data = filterRiwayat();
+  var range = getRangeDate(periodeAktif);
+
+  var infoEl = document.getElementById('infoPeriode');
+  if (!infoEl) return;
+
+  if (range) {
+    var fmt = function(d) { return d.toLocaleDateString('id-ID'); };
+    infoEl.textContent = 'Periode: ' + fmt(range.start) + ' s/d ' + fmt(range.end) + ' — Total ' + data.length + ' transaksi';
+  } else {
+    infoEl.textContent = 'Semua transaksi: ' + data.length + ' transaksi';
+  }
+
+  renderLaporanProduksi(data);
+  renderLaporanPenjualan(data);
+  renderRestock();
+}
+
+function renderLaporanProduksi(data) {
+  var el = document.getElementById('laporanProduksi');
+  if (!el) return;
+  var masuk = data.filter(function(r) { return r.jenis === 'Masuk'; });
+
+  if (masuk.length === 0) {
+    el.innerHTML = '<div class="empty">Tidak ada produksi pada periode ini.</div>';
+    return;
+  }
+
+  var perModel = {};
+  var perHari = {};
+  var total = 0;
+
+  masuk.forEach(function(r) {
+    total += r.jumlah;
+    perModel[r.model] = (perModel[r.model] || 0) + r.jumlah;
+    var tgl = parseWaktu(r.waktu);
+    var key = tgl ? tgl.toLocaleDateString('id-ID') : '?';
+    perHari[key] = (perHari[key] || 0) + r.jumlah;
+  });
+
+  var html = '';
+  html += '<div style="background:#d4edda; padding:15px; border-radius:8px; margin-bottom:15px;">';
+  html += '<div style="font-size:14px; color:#155724;">Total Pcs Diproduksi:</div>';
+  html += '<div style="font-size:36px; font-weight:700; color:#27ae60;">' + total + ' pcs</div>';
+  html += '</div>';
+
+  html += '<h4 style="margin:15px 0 8px; color:#2c3e50;">Per Model</h4>';
+  html += '<table><thead><tr><th>Model</th><th>Total Pcs</th><th>Persentase</th></tr></thead><tbody>';
+  var models = Object.keys(perModel).sort(function(a, b) { return perModel[b] - perModel[a]; });
+  models.forEach(function(m) {
+    var pct = total > 0 ? Math.round((perModel[m] / total) * 100) : 0;
+    html += '<tr><td><span class="kode-badge">' + m + '</span></td><td><strong>' + perModel[m] + ' pcs</strong></td><td>' + pct + '%</td></tr>';
+  });
+  html += '</tbody></table>';
+
+  html += '<h4 style="margin:15px 0 8px; color:#2c3e50;">Per Hari</h4>';
+  html += '<table><thead><tr><th>Tanggal</th><th>Total Pcs</th></tr></thead><tbody>';
+  var hariList = Object.keys(perHari).sort();
+  hariList.forEach(function(h) {
+    html += '<tr><td>' + h + '</td><td><strong>' + perHari[h] + ' pcs</strong></td></tr>';
+  });
+  html += '</tbody></table>';
+
+  el.innerHTML = html;
+}
+
+function renderLaporanPenjualan(data) {
+  var el = document.getElementById('laporanPenjualan');
+  if (!el) return;
+  var keluar = data.filter(function(r) { return r.jenis === 'Keluar'; });
+
+  if (keluar.length === 0) {
+    el.innerHTML = '<div class="empty">Tidak ada penjualan pada periode ini.</div>';
+    return;
+  }
+
+  var perModel = {};
+  var perSku = {};
+  var total = 0;
+
+  keluar.forEach(function(r) {
+    total += r.jumlah;
+    perModel[r.model] = (perModel[r.model] || 0) + r.jumlah;
+    var key = r.model + '||' + r.warna;
+    if (!perSku[key]) perSku[key] = { model: r.model, warna: r.warna, jumlah: 0 };
+    perSku[key].jumlah += r.jumlah;
+  });
+
+  var html = '';
+  html += '<div style="background:#f8d7da; padding:15px; border-radius:8px; margin-bottom:15px;">';
+  html += '<div style="font-size:14px; color:#721c24;">Total Pcs Terjual:</div>';
+  html += '<div style="font-size:36px; font-weight:700; color:#e74c3c;">' + total + ' pcs</div>';
+  html += '</div>';
+
+  html += '<h4 style="margin:15px 0 8px; color:#2c3e50;">Per Model</h4>';
+  html += '<table><thead><tr><th>Model</th><th>Total Pcs</th><th>Persentase</th></tr></thead><tbody>';
+  var models = Object.keys(perModel).sort(function(a, b) { return perModel[b] - perModel[a]; });
+  models.forEach(function(m) {
+    var pct = total > 0 ? Math.round((perModel[m] / total) * 100) : 0;
+    html += '<tr><td><span class="kode-badge">' + m + '</span></td><td><strong>' + perModel[m] + ' pcs</strong></td><td>' + pct + '%</td></tr>';
+  });
+  html += '</tbody></table>';
+
+  html += '<h4 style="margin:15px 0 8px; color:#2c3e50;">🏆 Best Seller (Model + Warna)</h4>';
+  html += '<table><thead><tr><th>#</th><th>Model</th><th>Warna</th><th>Terjual</th><th>Stok Sisa</th></tr></thead><tbody>';
+  var skus = Object.keys(perSku).map(function(k) { return perSku[k]; });
+  skus.sort(function(a, b) { return b.jumlah - a.jumlah; });
+  skus.slice(0, 20).forEach(function(s, i) {
+    var stokKey = s.model + '||' + s.warna;
+    var item = stok[stokKey];
+    var stokSisa = item ? totalStokItem(item) : 0;
+    var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+    html += '<tr><td>' + medal + '</td><td><span class="kode-badge">' + s.model + '</span></td><td>' + s.warna + '</td><td><strong>' + s.jumlah + ' pcs</strong></td><td>' + stokSisa + '</td></tr>';
+  });
+  html += '</tbody></table>';
+
+  el.innerHTML = html;
+}
+
+function renderRestock() {
+  var el = document.getElementById('rekomendasiRestock');
+  if (!el) return;
+  var items = [];
+
+  Object.keys(stok).forEach(function(key) {
+    var item = stok[key];
+    var total = totalStokItem(item);
+    if (total <= 10) {
+      items.push({ model: item.model, warna: item.warna, total: total, sizes: item.sizes });
+    }
+  });
+
+  if (items.length === 0) {
+    el.innerHTML = '<div class="empty">✅ Semua stok aman (di atas 10 pcs)</div>';
+    return;
+  }
+
+  items.sort(function(a, b) { return a.total - b.total; });
+
+  var html = '';
+  html += '<div class="info-baris">SKU dengan total stok <strong>≤ 10 pcs</strong>. Segera produksi ulang!</div>';
+  html += '<table><thead><tr><th>Model</th><th>Warna</th><th>Total</th><th>Prioritas</th><th>Detail Ukuran</th></tr></thead><tbody>';
+
+  items.forEach(function(it) {
+    var prioritas = it.total === 0 ? '🔴 HABIS' : it.total <= 5 ? '🟠 URGENT' : '🟡 Rendah';
+    var bg = it.total === 0 ? 'background:#f8d7da;' : it.total <= 5 ? 'background:#fff3cd;' : '';
+    var detail = ukuranList.map(function(u) { return u + ':' + (it.sizes[u] || 0); }).join(' · ');
+    html += '<tr style="' + bg + '">';
+    html += '<td><span class="kode-badge">' + it.model + '</span></td>';
+    html += '<td>' + it.warna + '</td>';
+    html += '<td><strong>' + it.total + ' pcs</strong></td>';
+    html += '<td>' + prioritas + '</td>';
+    html += '<td><small>' + detail + '</small></td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function exportCSV(tipe) {
+  var data = filterRiwayat();
+  var rows = [];
+  rows.push(['Waktu', 'Model', 'Warna', 'Ukuran', 'Jumlah', 'Keterangan']);
+  var filterJenis = (tipe === 'produksi') ? 'Masuk' : 'Keluar';
+  data.filter(function(r) { return r.jenis === filterJenis; }).forEach(function(r) {
+    rows.push([r.waktu, r.model, r.warna, r.ukuran, r.jumlah, r.ket || '']);
+  });
+
+  var csv = rows.map(function(row) {
+    return row.map(function(cell) {
+      return '"' + String(cell).replace(/"/g, '""') + '"';
+    }).join(',');
+  }).join('\n');
+
+  var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'laporan-' + tipe + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+//===========================================
+// CEK FISIK (STOK OPNAME)
+// ==========================================
+var cfHasilTerakhir = null;
+
+function cfUpdateWarna() {
+  var model = document.getElementById('cfModel').value;
+  var sel = document.getElementById('cfWarna');
+  var warnas = getWarnaList(model);
+  var html = '<option value="">-- Pilih Warna --</option>';
+  warnas.forEach(function(w) {
+    html += '<option value="' + w + '">' + w + '</option>';
+  });
+  sel.innerHTML = html;
+  document.getElementById('cfSizeTable').innerHTML = '';
+  document.getElementById('cfHasil').innerHTML = '';
+  cfHasilTerakhir = null;
+}
+
+function cfRenderSizeInput() {
+  var model = document.getElementById('cfModel').value;
+  var warna = document.getElementById('cfWarna').value;
+  var el = document.getElementById('cfSizeTable');
+
+  if (!model || !warna) {
+    el.innerHTML = '';
+    return;
+  }
+
+  var key = keyOf(model, warna);
+  var item = stok[key];
+  if (!item) {
+    el.innerHTML = '<div class="empty">Data tidak ditemukan.</div>';
+    return;
+  }
+
+  var html = '<table class="cf-table">';
+  html += '<thead><tr><th>Ukuran</th><th>Stok Sistem</th><th>Stok Fisik</th></tr></thead><tbody>';
+  ukuranList.forEach(function(u) {
+    var sistem = item.sizes[u] || 0;
+    html += '<tr>';
+    html += '<td><strong>' + u + '</strong></td>';
+    html += '<td><span class="kode-badge">' + sistem + '</span></td>';
+    html += '<td><input type="number" min="0" value="' + sistem + '" data-cfsize="' + u + '"></td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+
+  document.getElementById('cfHasil').innerHTML = '';
+  cfHasilTerakhir = null;
+}
+
+function cfHitungSelisih() {
+  var model = document.getElementById('cfModel').value;
+  var warna = document.getElementById('cfWarna').value;
+
+  if (!model || !warna) {
+    alert('❌ Pilih Model & Warna dulu!');
+    return;
+  }
+
+  var key = keyOf(model, warna);
+  var item = stok[key];
+  if (!item) {
+    alert('❌ Data tidak ditemukan!');
+    return;
+  }
+
+  var inputs = document.querySelectorAll('#cfSizeTable input[data-cfsize]');
+  if (inputs.length === 0) {
+    alert('❌ Isi stok fisik dulu!');
+    return;
+  }
+
+  var hasil = [];
+  var totalSelisih = 0;
+  var maxAbs = 0;
+  var adaMasalah = false;
+
+  inputs.forEach(function(inp) {
+    var u = inp.dataset.cfsize;
+    var fisik = parseInt(inp.value) || 0;
+    var sistem = item.sizes[u] || 0;
+    var selisih = fisik - sistem;
+    totalSelisih += selisih;
+    if (Math.abs(selisih) > maxAbs) maxAbs = Math.abs(selisih);
+    if (selisih !== 0) adaMasalah = true;
+
+    hasil.push({ ukuran: u, sistem: sistem, fisik: fisik, selisih: selisih });
+  });
+
+  cfHasilTerakhir = {
+    waktu: new Date().toLocaleString('id-ID'),
+    model: model,
+    warna: warna,
+    hasil: hasil,
+    totalSelisih: totalSelisih,
+    maxAbs: maxAbs
+  };
+
+  cfTampilkanHasil(model, warna, hasil, totalSelisih, maxAbs, adaMasalah);
+}
+
+function cfTampilkanHasil(model, warna, hasil, totalSelisih, maxAbs, adaMasalah) {
+  var el = document.getElementById('cfHasil');
+  var html = '';
+
+  if (!adaMasalah) {
+    html += '<div class="cf-alert cf-alert-ok">✅ SEMPURNA! Stok fisik sesuai dengan sistem (0 selisih).</div>';
+  } else if (maxAbs > 5) {
+    html += '<div class="cf-alert cf-alert-bad">🚨 ALERT! Ada selisih LEBIH DARI 5 PCS. Perlu investigasi!</div>';
+  } else {
+    html += '<div class="cf-alert cf-alert-warn">⚠️ Ada selisih kecil. Periksa detail di bawah.</div>';
+  }
+
+  var warnaTotal = totalSelisih === 0 ? '#27ae60' : (totalSelisih > 0 ? '#3498db' : '#e74c3c');
+  html += '<div style="text-align:center; padding:10px; background:#f8f9fa; border-radius:8px; margin:10px 0;">';
+  html += '<div style="font-size:13px; color:#666;">Total Selisih (Fisik - Sistem)</div>';
+  html += '<div style="font-size:28px; font-weight:700; color:' + warnaTotal + ';">';
+  html += (totalSelisih > 0 ? '+' : '') + totalSelisih + ' pcs</div>';
+  html += '</div>';
+
+  html += '<h4 style="margin:15px 0 8px; color:#2c3e50;">Detail Per Ukuran</h4>';
+  html += '<table class="cf-table"><thead><tr><th>Ukuran</th><th>Sistem</th><th>Fisik</th><th>Selisih</th><th>Status</th></tr></thead><tbody>';
+  hasil.forEach(function(h) {
+    var cls = 'cf-selisih-ok';
+    var rowCls = '';
+    var status = '✅ OK';
+    if (h.selisih !== 0) {
+      if (Math.abs(h.selisih) > 5) {
+        cls = 'cf-selisih-bad';
+        rowCls = 'cf-row-bad';
+        status = '🚨 ALERT';
+      } else {
+        cls = 'cf-selisih-warn';
+        rowCls = 'cf-row-warn';
+        status = '⚠️ Beda';
+      }
+    }
+    var tanda = h.selisih > 0 ? '+' : '';
+    html += '<tr class="' + rowCls + '">';
+    html += '<td><strong>' + h.ukuran + '</strong></td>';
+    html += '<td>' + h.sistem + '</td>';
+    html += '<td>' + h.fisik + '</td>';
+    html += '<td class="' + cls + '">' + tanda + h.selisih + '</td>';
+    html += '<td>' + status + '</td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+
+  html += '<div style="font-size:12px; color:#666; margin-top:10px;">SKU: <strong>' + model + ' - ' + warna + '</strong></div>';
+
+  el.innerHTML = html;
+}
+
+function cfReset() {
+  document.getElementById('cfModel').value = '';
+  document.getElementById('cfWarna').innerHTML = '<option value="">-- Pilih Warna --</option>';
+  document.getElementById('cfSizeTable').innerHTML = '';
+  document.getElementById('cfHasil').innerHTML = '';
+  cfHasilTerakhir = null;
+}
+
+function cfExportCSV() {
+  if (!cfHasilTerakhir) {
+    alert('❌ Lakukan "Hitung Selisih" dulu!');
+    return;
+  }
+
+  var d = cfHasilTerakhir;
+  var rows = [];
+  rows.push(['LAPORAN CEK FISIK STOK JAS YANUFA']);
+  rows.push(['Waktu:', d.waktu]);
+  rows.push(['SKU:', d.model + ' - ' + d.warna]);
+  rows.push(['Total Selisih:', d.totalSelisih + ' pcs']);
+  rows.push([]);
+  rows.push(['Ukuran', 'Stok Sistem', 'Stok Fisik', 'Selisih', 'Status']);
+
+  d.hasil.forEach(function(h) {
+    var status = h.selisih === 0 ? 'OK' : (Math.abs(h.selisih) > 5 ? 'ALERT' : 'Beda');
+    rows.push([h.ukuran, h.sistem, h.fisik, h.selisih, status]);
+  });
+
+  var csv = rows.map(function(row) {
+    return row.map(function(cell) {
+      return '"' + String(cell).replace(/"/g, '""') + '"';
+    }).join(',');
+  }).join('\n');
+
+  var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'cek-fisik-' + d.model + '-' + d.warna + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
 // ==========================================
 // AUTO LOAD
 // ==========================================
