@@ -641,7 +641,21 @@ async function ambilDariCloud() {
     }
     if (json.stok && Object.keys(json.stok).length > 0) {
       stok = json.stok;
-      riwayat = json.riwayat || [];
+riwayat = json.riwayat || [];
+// Migrasi data cloud (kalau ada yang format lama)
+Object.keys(stok).forEach(function(key) {
+  var item = stok[key];
+  if (!item.stok) {
+    item.stok = { langen: item.sizes || {}, wage: {} };
+    delete item.sizes;
+  }
+  if (!item.stok.langen) item.stok.langen = {};
+  if (!item.stok.wage) item.stok.wage = {};
+  ukuranList.forEach(function(u) {
+    if (typeof item.stok.langen[u] !== 'number') item.stok.langen[u] = 0;
+    if (typeof item.stok.wage[u] !== 'number') item.stok.wage[u] = 0;
+  });
+});
       localStorage.setItem('ukuranList_v3', JSON.stringify(ukuranList));
       localStorage.setItem('stok_v3', JSON.stringify(stok));
       localStorage.setItem('riwayat_v3', JSON.stringify(riwayat));
@@ -717,8 +731,11 @@ function tambahModelWarna() {
   const key = keyOf(model, warna);
   if (stok[key]) return showMsg('msgStok', '❌ Model "' + model + '" warna "' + warna + '" sudah ada!', 'error');
 
-  stok[key] = { model, warna, sizes: {} };
-  ukuranList.forEach(u => { stok[key].sizes[u] = 0; });
+  stok[key] = { model: model, warna: warna, stok: { langen: {}, wage: {} } };
+  ukuranList.forEach(function(u) {
+    stok[key].stok.langen[u] = 0;
+    stok[key].stok.wage[u] = 0;
+  });
 
   simpan();
   document.getElementById('inputModel').value = '';
@@ -741,6 +758,32 @@ function hapusModelWarna(key) {
 // ==========================================
 // RENDER STOK
 // ==========================================
+function simpanUkuran() {
+  const input = document.getElementById('inputUkuran').value.trim();
+  if (!input) return showMsg('msgUkuran', '❌ Daftar ukuran tidak boleh kosong!', 'error');
+
+  const list = input.split(',').map(x => x.trim()).filter(x => x);
+  if (list.length === 0) return showMsg('msgUkuran', '❌ Format salah!', 'error');
+
+  if (!confirm('Ubah daftar ukuran? Data ukuran lama yang tidak ada di daftar baru akan hilang.')) return;
+
+  ukuranList = list;
+
+  Object.values(stok).forEach(function(item) {
+    var newLangen = {};
+    var newWage = {};
+    ukuranList.forEach(function(u) {
+      newLangen[u] = (item.stok && item.stok.langen && item.stok.langen[u]) || 0;
+      newWage[u] = (item.stok && item.stok.wage && item.stok.wage[u]) || 0;
+    });
+    item.stok = { langen: newLangen, wage: newWage };
+  });
+
+  simpan();
+  showMsg('msgUkuran', '✅ Daftar ukuran diubah: ' + list.join(', '), 'success');
+  render();
+}
+
 function renderRingkasanPerUkuran() {
   var el = document.getElementById('ringkasanPerUkuran');
   if (!el) return;
@@ -756,18 +799,16 @@ function renderRingkasanPerUkuran() {
 
   models.forEach(function(model) {
     var perUkuran = {};
-    ukuranList.forEach(function(u) {
-      perUkuran[u] = [];
-    });
+    ukuranList.forEach(function(u) { perUkuran[u] = []; });
 
     var warnas = getWarnaList(model);
     warnas.forEach(function(w) {
       var item = stok[keyOf(model, w)];
       if (!item) return;
       ukuranList.forEach(function(u) {
-        var val = item.sizes[u] || 0;
-        if (val <= 1) {
-          perUkuran[u].push({ warna: w, stok: val });
+        var total = totalStokUkuran(item, u);
+        if (total <= 1) {
+          perUkuran[u].push({ warna: w, total: total });
         }
       });
     });
@@ -782,17 +823,16 @@ function renderRingkasanPerUkuran() {
 
     html += '<div style="margin-bottom:18px;">';
     html += '<div style="font-weight:700; color:#2c3e50; margin-bottom:8px; font-size:16px;">🎯 Model ' + model + '</div>';
-    html += '<table class="tabel-ukuran"><thead><tr><th style="width:70px; text-align:center;">Size</th><th>Warna Perlu Diproduksi</th></tr></thead><tbody>';
+    html += '<table class="tabel-ukuran"><thead><tr><th style="width:70px; text-align:center;">Size</th><th>Warna Perlu Diproduksi (total 2 gudang)</th></tr></thead><tbody>';
 
     ukuranList.forEach(function(u) {
       var list = perUkuran[u];
       if (list.length === 0) return;
-
-      list.sort(function(a, b) { return a.stok - b.stok; });
+      list.sort(function(a, b) { return a.total - b.total; });
 
       var tags = list.map(function(w) {
-        var cls = w.stok === 0 ? 'warna-habis' : 'warna-sisa-satu';
-        var icon = w.stok === 0 ? '🔴' : '🟠';
+        var cls = w.total === 0 ? 'warna-habis' : 'warna-sisa-satu';
+        var icon = w.total === 0 ? '🔴' : '🟠';
         return '<span class="warna-tag ' + cls + '">' + icon + ' ' + w.warna + '</span>';
       }).join('');
 
@@ -1033,11 +1073,14 @@ function simpanUkuran() {
 
   ukuranList = list;
 
-  // Reset size di semua item & pastikan semua ukuran ada
-  Object.values(stok).forEach(item => {
-    const newSizes = {};
-    ukuranList.forEach(u => { newSizes[u] = item.sizes[u] || 0; });
-    item.sizes = newSizes;
+  Object.values(stok).forEach(function(item) {
+    var newLangen = {};
+    var newWage = {};
+    ukuranList.forEach(function(u) {
+      newLangen[u] = (item.stok && item.stok.langen && item.stok.langen[u]) || 0;
+      newWage[u] = (item.stok && item.stok.wage && item.stok.wage[u]) || 0;
+    });
+    item.stok = { langen: newLangen, wage: newWage };
   });
 
   simpan();
