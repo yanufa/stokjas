@@ -195,34 +195,21 @@
 
   <!-- ================= TAB STOK ================= -->
   <div id="stok" class="tab-content active">
-    <div class="card">
-      <h3>➕ Tambah Model & Warna Baru</h3>
-      <div id="msgStok" class="msg"></div>
-  <div class="row">
-    <div class="form-group">
-      <label>Model</label>
-      <input type="text" id="inputModel" placeholder="Contoh: KC6" autocomplete="off">
-    </div>
-    <div class="form-group">
-      <label>Warna</label>
-      <input type="text" id="inputWarna" placeholder="Contoh: Hitam" autocomplete="off">
-    </div>
-  </div>
-  <button class="primary" onclick="tambahModelWarna()">➕ Tambah Model & Warna</button>
-</div>
+    
 
     <div class="card">
       <h3>📋 Stok Jas Yanufa</h3>
-      <div class="card" style="margin-bottom:15px;">
+<div id="daftarStok"></div>
+
+<div class="card" style="margin-top:20px; margin-bottom:0;">
   <h3>📏 Produksi Per Ukuran</h3>
   <div class="info-baris">
     💡 Cek ukuran mana yang perlu diproduksi. Cocok untuk produksi potong per ukuran.
   </div>
   <div id="ringkasanPerUkuran"></div>
 </div>
-      <div id="daftarStok"></div>
-    </div>
-  </div>
+</div>
+</div>
 
   <!-- ================= TAB MASUK ================= -->
   <div id="masuk" class="tab-content">
@@ -382,7 +369,7 @@
       <button class="primary danger" style="margin-top:15px;" onclick="hapusRiwayat()">🗑️ Hapus Semua Riwayat</button>
     </div>
   </div>
-
+  
   <!-- ================= TAB SETTING ================= -->
   <div id="setting" class="tab-content">
     <div class="card">
@@ -399,6 +386,21 @@
     </div>
 
     <div class="card">
+<div class="card">
+      <h3>➕ Tambah Model & Warna Baru</h3>
+      <div id="msgStok" class="msg"></div>
+      <div class="row">
+        <div class="form-group">
+          <label>Model</label>
+          <input type="text" id="inputModel" placeholder="Contoh: KC6" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Warna</label>
+          <input type="text" id="inputWarna" placeholder="Contoh: Hitam" autocomplete="off">
+        </div>
+      </div>
+      <button class="primary" onclick="tambahModelWarna()">➕ Tambah Model & Warna</button>
+    </div>
       <h3>🗑️ Hapus Model</h3>
       <div id="msgHapusModel" class="msg"></div>
       <div class="form-group">
@@ -1666,5 +1668,7 @@ window.addEventListener('offline', () => { updateStatusCloud('offline'); });
 
 render();
 </script>
+</div>
+>/div>
 </body>
 </html>
