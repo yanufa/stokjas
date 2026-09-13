@@ -23,6 +23,7 @@
   input:focus, select:focus { outline: none; border-color: #2c3e50; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .row4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
   button.primary {
     background: #27ae60; color: white; border: none; padding: 14px;
     border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; font-size: 15px;
@@ -137,6 +138,43 @@
 .pin-btn-ok { background: #27ae60; color: white; }
 .pin-btn-ok:hover { background: #219150; }
 .pin-lockout { color: #e74c3c; font-size: 14px; font-weight: 700; margin-top: 10px; min-height: 20px; }
+/* ============ MODE KARYAWAN/ADMIN ============ */
+.mode-toggle {
+  position: fixed; top: 10px; left: 10px; z-index: 9998;
+  background: rgba(44,62,80,.9); color: white;
+  padding: 6px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  display: none; user-select: none;
+}
+.mode-toggle.show { display: block; }
+.mode-badge-karyawan {
+  position: fixed; top: 10px; left: 10px; z-index: 9998;
+  background: #3498db; color: white;
+  padding: 6px 12px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+}
+.tab-btn.locked { opacity: .4; cursor: not-allowed; }
+.btn-locked {
+  background: #95a5a6 !important;
+  cursor: not-allowed !important;
+  position: relative;
+}
+.btn-locked::after {
+  content: ' 🔐';
+}
+.hidden-karyawan { display: none !important; }
+body.mode-karyawan .admin-only { display: none !important; }
+.toast-locked {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: #e74c3c; color: white; padding: 12px 20px;
+  border-radius: 8px; font-size: 13px; font-weight: 600;
+  z-index: 9999; animation: slideUp .3s;
+  box-shadow: 0 4px 20px rgba(0,0,0,.3);
+}
+@keyframes slideUp {
+  from { bottom: -50px; opacity: 0; }
+  to { bottom: 20px; opacity: 1; }
+}
 .tabel-ukuran { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
 .tabel-ukuran th {
   background: #34495e; color: white; padding: 8px 12px;
@@ -159,10 +197,29 @@
 .warna-habis { background: #f8d7da; color: #721c24; }
 .warna-sisa-satu { background: #ffe0b2; color: #8a4b00; }
   @media (max-width: 600px) {
-    .row, .row3 { grid-template-columns: 1fr; }
+    .row, .row3, .row4 { grid-template-columns: 1fr; }
     h1 { font-size: 20px; }
   }
 </style>
+<!-- ================= MODE BADGE (KIRI ATAS) ================= -->
+<div id="modeBadge" class="mode-badge-karyawan">👨‍🏭 Mode Karyawan</div>
+<div id="modeToggle" class="mode-toggle" onclick="logoutAdmin()">🔓 Admin Aktif — Tap untuk Logout</div>
+
+<!-- ================= MODAL PIN ADMIN ================= -->
+<div id="adminPinModal" class="pin-modal">
+  <div class="pin-box">
+    <div class="pin-icon">🔐</div>
+    <h3 class="pin-title">Mode Admin</h3>
+    <p class="pin-subtitle">Masukkan PIN untuk akses penuh</p>
+    <input type="password" id="adminPinInput" class="pin-input" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off">
+    <div id="adminPinError" class="pin-error"></div>
+    <div class="pin-buttons">
+      <button class="pin-btn-cancel" onclick="tutupAdminPIN()">Batal</button>
+      <button class="pin-btn-ok" onclick="verifikasiAdminPIN()">Buka</button>
+    </div>
+    <div id="adminPinLockout" class="pin-lockout"></div>
+  </div>
+</div>
 <!-- ================= MODAL PIN ================= -->
 <div id="pinModal" class="pin-modal">
   <div class="pin-box">
@@ -184,13 +241,13 @@
   <h1>👔 Stok Jas Yanufa</h1>
 
   <div class="tabs">
-  <button class="tab-btn" onclick="showTab('laporan', this)">📊 Laporan</button>
-    <button class="tab-btn" onclick="showTab('cekfisik', this)">🔍 Cek Fisik</button>
+  <button class="tab-btn admin-only" onclick="showTab('laporan', this)">📊 Laporan</button>
+    <button class="tab-btn admin-only" onclick="showTab('cekfisik', this)">🔍 Cek Fisik</button>
     <button class="tab-btn active" onclick="showTab('stok', this)">📊 Stok</button>
     <button class="tab-btn" onclick="showTab('masuk', this)">⬇️ Masuk</button>
     <button class="tab-btn" onclick="showTab('keluar', this)">⬆️ Keluar</button>
-    <button class="tab-btn" onclick="showTab('riwayat', this)">📜 Riwayat</button>
-    <button class="tab-btn" onclick="showTab('setting', this)">⚙️ Setting</button>
+    <button class="tab-btn admin-only" onclick="showTab('riwayat', this)">📜 Riwayat</button>
+    <button class="tab-btn admin-only" onclick="showTab('setting', this)">⚙️ Setting</button>
   </div>
 
   <!-- ================= TAB STOK ================= -->
@@ -219,23 +276,30 @@
       <div class="info-baris">
         💡 Pilih <strong>Gudang</strong> + <strong>Model</strong> + <strong>Warna</strong> → isi jumlah per ukuran
       </div>
-      <div class="row3">
-        <div class="form-group">
-          <label>Gudang</label>
-          <select id="masukGudang" class="besar">
-            <option value="langen">🏭 Langen</option>
-            <option value="wage">🏭 Wage</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Model</label>
-          <select id="masukModel" class="besar" onchange="updateWarnaMasuk()"></select>
-        </div>
-        <div class="form-group">
-          <label>Warna</label>
-          <select id="masukWarna" class="besar"></select>
-        </div>
-      </div>
+      <div class="row4">
+  <div class="form-group">
+    <label>Jenis</label>
+    <select id="masukJenis" class="besar">
+      <option value="produksi">🏭 Produksi</option>
+      <option value="retur">🔄 Retur</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Gudang</label>
+    <select id="masukGudang" class="besar">
+      <option value="langen">🏭 Langen</option>
+      <option value="wage">🏭 Wage</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Model</label>
+    <select id="masukModel" class="besar" onchange="updateWarnaMasuk()"></select>
+  </div>
+  <div class="form-group">
+    <label>Warna</label>
+    <select id="masukWarna" class="besar"></select>
+  </div>
+</div>
       <div class="form-group">
         <label>Jumlah per Ukuran</label>
         <div id="masukSizes" class="size-grid"></div>
@@ -489,6 +553,141 @@ function totalStokGudang(item, gudang) {
 // ==========================================
 // ==========================================
 // PIN LOCK (KELUAR & CEK FISIK)
+// ==========================================
+// ==========================================
+// MODE KARYAWAN / ADMIN
+// ==========================================
+var isAdmin = false;
+var ADMIN_PIN = '8008';
+var tapCount = 0;
+var tapTimer = null;
+var TAB_KARYAWAN = ['stok', 'masuk', 'keluar'];
+
+function setupModeKaryawan() {
+  isAdmin = false;
+  localStorage.removeItem('stokjas_admin');
+  document.body.classList.add('mode-karyawan');
+  
+  // Update badge
+  var badge = document.getElementById('modeBadge');
+  var toggle = document.getElementById('modeToggle');
+  if (badge) badge.style.display = 'block';
+  if (toggle) toggle.classList.remove('show');
+  
+  // Sembunyikan tab admin-only
+  document.querySelectorAll('.admin-only').forEach(function(el) {
+    el.style.display = 'none';
+  });
+  
+  // Kunci dropdown gudang di tab Masuk
+  var masukGudang = document.getElementById('masukGudang');
+  if (masukGudang) {
+    masukGudang.value = 'langen';
+    masukGudang.disabled = true;
+  }
+  
+  // Tombol logout PIN (kalau ada)
+  console.log('✅ Mode Karyawan aktif');
+  render();
+}
+
+function setupModeAdmin() {
+  isAdmin = true;
+  localStorage.setItem('stokjas_admin', '1');
+  document.body.classList.remove('mode-karyawan');
+  
+  // Update badge
+  var badge = document.getElementById('modeBadge');
+  var toggle = document.getElementById('modeToggle');
+  if (badge) badge.style.display = 'none';
+  if (toggle) toggle.classList.add('show');
+  
+  // Tampilkan tab admin-only
+  document.querySelectorAll('.admin-only').forEach(function(el) {
+    el.style.display = '';
+  });
+  
+  // Buka dropdown gudang di tab Masuk
+  var masukGudang = document.getElementById('masukGudang');
+  if (masukGudang) masukGudang.disabled = false;
+  
+  console.log('🔓 Mode Admin aktif');
+  render();
+}
+
+function logoutAdmin() {
+  if (!confirm('Keluar dari Mode Admin?')) return;
+  setupModeKaryawan();
+  // Pindah ke tab Stok (tab yang aman)
+  showTab('stok', document.querySelector('.tab-btn[onclick*="stok"]'));
+  alert('✅ Kembali ke Mode Karyawan');
+}
+
+// Deteksi ketukan logo 5x
+function setupTapLogo() {
+  var logo = document.querySelector('h1');
+  if (!logo) return;
+  
+  logo.style.cursor = 'pointer';
+  logo.style.userSelect = 'none';
+  
+  logo.addEventListener('click', function() {
+    tapCount++;
+    clearTimeout(tapTimer);
+    
+    if (tapCount >= 5) {
+      tapCount = 0;
+      mintaAdminPIN();
+    } else {
+      tapTimer = setTimeout(function() { tapCount = 0; }, 2000);
+    }
+  });
+}
+
+// Modal PIN Admin
+function mintaAdminPIN() {
+  var modal = document.getElementById('adminPinModal');
+  if (!modal) return;
+  
+  modal.classList.add('show');
+  var inp = document.getElementById('adminPinInput');
+  inp.value = '';
+  document.getElementById('adminPinError').textContent = '';
+  document.getElementById('adminPinLockout').textContent = '';
+  setTimeout(function() { inp.focus(); }, 100);
+}
+
+function tutupAdminPIN() {
+  document.getElementById('adminPinModal').classList.remove('show');
+  document.getElementById('adminPinInput').value = '';
+  document.getElementById('adminPinError').textContent = '';
+  document.getElementById('adminPinLockout').textContent = '';
+}
+
+function verifikasiAdminPIN() {
+  var inp = document.getElementById('adminPinInput');
+  var pin = inp.value.trim();
+  var error = document.getElementById('adminPinError');
+  
+  if (!pin) {
+    error.textContent = 'PIN tidak boleh kosong';
+    return;
+  }
+  
+  if (pin === ADMIN_PIN) {
+    tutupAdminPIN();
+    setupModeAdmin();
+    alert('🔓 Mode Admin aktif! Semua tab terbuka.');
+  } else {
+    inp.value = '';
+    error.textContent = '❌ PIN salah';
+  }
+}
+
+document.getElementById('adminPinInput')?.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') verifikasiAdminPIN();
+});
+
 // ==========================================
 var pinUnlocked = {};
 var pinPendingTab = null;
@@ -926,13 +1125,30 @@ function renderRiwayat() {
   tb.innerHTML = riwayat.slice(0, 200).map(function(r) {
     var gudangLabel = r.gudang === 'wage' ? '🏭 Wage' : '🏭 Langen';
     var gudangBg = r.gudang === 'wage' ? '#9b59b6' : '#3498db';
+    
+    // Tentukan jenis label & warna
+    var jenisLabel = '';
+    var jenisBg = '';
+    if (r.jenis === 'Masuk') {
+      if (r.jenisDetail === 'retur') {
+        jenisLabel = '🔄 Retur';
+        jenisBg = '#f39c12';  // orange
+      } else {
+        jenisLabel = '🏭 Produksi';
+        jenisBg = '#27ae60';  // hijau
+      }
+    } else {
+      jenisLabel = '⬆️ Keluar';
+      jenisBg = '#e74c3c';  // merah
+    }
+    
     return '<tr>' +
       '<td><small>' + r.waktu + '</small></td>' +
       '<td><span class="kode-badge">' + r.model + '</span></td>' +
       '<td><span class="warna-badge">' + r.warna + '</span></td>' +
       '<td>' + r.ukuran + '</td>' +
       '<td><span style="background:' + gudangBg + '; color:white; padding:2px 6px; border-radius:4px; font-size:11px;">' + gudangLabel + '</span></td>' +
-      '<td><span class="badge badge-' + (r.jenis === 'Masuk' ? 'in' : 'out') + '">' + r.jenis + '</span></td>' +
+      '<td><span style="background:' + jenisBg + '; color:white; padding:3px 8px; border-radius:20px; font-size:11px; font-weight:600;">' + jenisLabel + '</span></td>' +
       '<td><strong>' + (r.jenis === 'Masuk' ? '+' : '-') + r.jumlah + '</strong></td>' +
       '</tr>';
   }).join('');
@@ -979,11 +1195,13 @@ function ambilSizeValues(containerId) {
 }
 
 function prosesMasuk() {
+  var jenis = document.getElementById('masukJenis').value;
   var gudang = document.getElementById('masukGudang').value;
   var model = document.getElementById('masukModel').value;
   var warna = document.getElementById('masukWarna').value;
   var ket = document.getElementById('ketMasuk').value.trim();
 
+  if (!jenis) return showMsg('msgMasuk', '❌ Pilih Jenis dulu!', 'error');
   if (!gudang) return showMsg('msgMasuk', '❌ Pilih Gudang dulu!', 'error');
   if (!model) return showMsg('msgMasuk', '❌ Pilih Model dulu!', 'error');
   if (!warna) return showMsg('msgMasuk', '❌ Pilih Warna dulu!', 'error');
@@ -995,13 +1213,26 @@ function prosesMasuk() {
   var key = keyOf(model, warna);
   if (!stok[key]) return showMsg('msgMasuk', '❌ Data tidak ditemukan!', 'error');
 
+  // Jenis label: produksi / retur
+  var jenisLabel = (jenis === 'retur') ? 'Retur' : 'Produksi';
+
   var waktu = new Date().toLocaleString('id-ID');
   ukuranList.forEach(function(u) {
     var jml = values[u] || 0;
     if (jml > 0) {
       var current = getStok(stok[key], gudang, u);
       setStok(stok[key], gudang, u, current + jml);
-      riwayat.unshift({ waktu: waktu, model: model, warna: warna, ukuran: u, jenis: 'Masuk', jumlah: jml, ket: ket || '-', gudang: gudang });
+      riwayat.unshift({
+        waktu: waktu,
+        model: model,
+        warna: warna,
+        ukuran: u,
+        jenis: 'Masuk',
+        jenisDetail: jenis,        // 'produksi' atau 'retur'
+        jumlah: jml,
+        ket: ket || '-',
+        gudang: gudang
+      });
     }
   });
 
@@ -1009,7 +1240,7 @@ function prosesMasuk() {
   document.getElementById('ketMasuk').value = '';
   renderSizeInput('masukSizes', null);
 
-  showMsg('msgMasuk', '✅ ' + model + ' - ' + warna + ' [' + GUDANG_LABEL[gudang] + '] +' + total + ' pcs', 'success');
+  showMsg('msgMasuk', '✅ ' + jenisLabel + ' ' + model + ' - ' + warna + ' [' + GUDANG_LABEL[gudang] + '] +' + total + ' pcs', 'success');
   render();
 }
 
@@ -1286,7 +1517,7 @@ function renderLaporan() {
 function renderLaporanProduksi(data) {
   var el = document.getElementById('laporanProduksi');
   if (!el) return;
-  var masuk = data.filter(function(r) { return r.jenis === 'Masuk'; });
+  var masuk = data.filter(function(r) { return r.jenis === 'Masuk' && r.jenisDetail !== 'retur'; });
 
   if (masuk.length === 0) {
     el.innerHTML = '<div class="empty">Tidak ada produksi pada periode ini.</div>';
@@ -1442,7 +1673,12 @@ function exportCSV(tipe) {
   var rows = [];
   rows.push(['Waktu', 'Model', 'Warna', 'Ukuran', 'Gudang', 'Jumlah', 'Keterangan']);
   var filterJenis = (tipe === 'produksi') ? 'Masuk' : 'Keluar';
-  data.filter(function(r) { return r.jenis === filterJenis; }).forEach(function(r) {
+  var filterDetail = (tipe === 'produksi') ? 'produksi' : '';
+  data.filter(function(r) {
+    if (r.jenis !== filterJenis) return false;
+    if (tipe === 'produksi' && r.jenisDetail === 'retur') return false;
+    return true;
+  }).forEach(function(r) {
     var gudangLabel = r.gudang === 'wage' ? 'Wage' : 'Langen';
     rows.push([r.waktu, r.model, r.warna, r.ukuran, gudangLabel, r.jumlah, r.ket || '']);
   });
@@ -1667,7 +1903,10 @@ window.addEventListener('load', () => {
 window.addEventListener('online', () => { if (SYNC_ENABLED) ambilDariCloud(); });
 window.addEventListener('offline', () => { updateStatusCloud('offline'); });
 
+setupTapLogo();
+setupModeKaryawan();
 render();
+</script>
 </script>
 </div>
 </div>
