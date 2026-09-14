@@ -252,21 +252,19 @@ body.mode-karyawan .admin-only { display: none !important; }
 
   <!-- ================= TAB STOK ================= -->
   <div id="stok" class="tab-content active">
-    
-
     <div class="card">
       <h3>📋 Stok Jas Yanufa</h3>
-<div id="daftarStok"></div>
+      <div id="daftarStok"></div>
 
-<div class="card" style="margin-top:20px; margin-bottom:0;">
-  <h3>📏 Produksi Per Ukuran</h3>
-  <div class="info-baris">
-    💡 Cek ukuran mana yang perlu diproduksi. Cocok untuk produksi potong per ukuran.
+      <div class="card" style="margin-top:20px; margin-bottom:0;">
+        <h3>📏 Produksi Per Ukuran</h3>
+        <div class="info-baris">
+          💡 Cek ukuran mana yang perlu diproduksi. Cocok untuk produksi potong per ukuran.
+        </div>
+        <div id="ringkasanPerUkuran"></div>
+      </div>
+    </div>
   </div>
-  <div id="ringkasanPerUkuran"></div>
-</div>
-</div>
-</div>
 
   <!-- ================= TAB MASUK ================= -->
   <div id="masuk" class="tab-content">
@@ -274,32 +272,32 @@ body.mode-karyawan .admin-only { display: none !important; }
       <h3>⬇️ Barang Masuk (Stok Bertambah)</h3>
       <div id="msgMasuk" class="msg"></div>
       <div class="info-baris">
-        💡 Pilih <strong>Gudang</strong> + <strong>Model</strong> + <strong>Warna</strong> → isi jumlah per ukuran
+        💡 Pilih <strong>Jenis</strong> + <strong>Gudang</strong> + <strong>Model</strong> + <strong>Warna</strong>
       </div>
       <div class="row4">
-  <div class="form-group">
-    <label>Jenis</label>
-    <select id="masukJenis" class="besar">
-      <option value="produksi">🏭 Produksi</option>
-      <option value="retur">🔄 Retur</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label>Gudang</label>
-    <select id="masukGudang" class="besar">
-      <option value="langen">🏭 Langen</option>
-      <option value="wage">🏭 Wage</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label>Model</label>
-    <select id="masukModel" class="besar" onchange="updateWarnaMasuk()"></select>
-  </div>
-  <div class="form-group">
-    <label>Warna</label>
-    <select id="masukWarna" class="besar"></select>
-  </div>
-</div>
+        <div class="form-group">
+          <label>Jenis</label>
+          <select id="masukJenis" class="besar">
+            <option value="produksi">🏭 Produksi</option>
+            <option value="retur">🔄 Retur</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Gudang</label>
+          <select id="masukGudang" class="besar">
+            <option value="langen">🏭 Langen</option>
+            <option value="wage">🏭 Wage</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Model</label>
+          <select id="masukModel" class="besar" onchange="updateWarnaMasuk()"></select>
+        </div>
+        <div class="form-group">
+          <label>Warna</label>
+          <select id="masukWarna" class="besar"></select>
+        </div>
+      </div>
       <div class="form-group">
         <label>Jumlah per Ukuran</label>
         <div id="masukSizes" class="size-grid"></div>
@@ -311,7 +309,7 @@ body.mode-karyawan .admin-only { display: none !important; }
       <button class="primary" onclick="prosesMasuk()">⬇️ Simpan Barang Masuk</button>
     </div>
   </div>
-
+  
   <!-- ================= TAB KELUAR ================= -->
   <div id="keluar" class="tab-content">
     <div class="card">
@@ -348,6 +346,7 @@ body.mode-karyawan .admin-only { display: none !important; }
       <button class="primary orange" onclick="prosesKeluar()">⬆️ Simpan Barang Keluar</button>
     </div>
   </div>
+ 
  <!-- ================= TAB CEK FISIK ================= -->
   <div id="cekfisik" class="tab-content">
     <div class="card">
@@ -420,19 +419,19 @@ body.mode-karyawan .admin-only { display: none !important; }
     <div class="card">
       <h3>⚠️ Perlu Diproduksi Lagi</h3>
       <div id="rekomendasiRestock"></div>
-    </div>
-  </div>
+     </div>
+     </div>
+    
   <!-- ================= TAB RIWAYAT ================= -->
   <div id="riwayat" class="tab-content">
     <div class="card">
       <h3>📜 Riwayat Transaksi</h3>
       <table>
-<thead><tr><th>Waktu</th><th>Model</th><th>Warna</th><th>Ukuran</th><th>Gudang</th><th>Jenis</th><th>Qty</th></tr></thead>
+        <thead><tr><th>Waktu</th><th>Model</th><th>Warna</th><th>Ukuran</th><th>Gudang</th><th>Jenis</th><th>Qty</th></tr></thead>
         <tbody id="tabelRiwayat"></tbody>
       </table>
       <button class="primary danger" style="margin-top:15px;" onclick="hapusRiwayat()">🗑️ Hapus Semua Riwayat</button>
     </div>
-  </div>
   </div>
   
   <!-- ================= TAB SETTING ================= -->
@@ -482,9 +481,8 @@ body.mode-karyawan .admin-only { display: none !important; }
       <input type="file" id="fileRestore" class="hilang" accept=".json" onchange="restoreJSON(event)">
     </div>
   </div>
-</div>
+  <script>
 
-<script>
 // ==========================================
 // KONFIGURASI CLOUD - GANTI DENGAN MILIK ANDA
 // ==========================================
@@ -1907,8 +1905,6 @@ setupTapLogo();
 setupModeKaryawan();
 render();
 </script>
-</script>
-</div>
 </div>
 </body>
 </html>
