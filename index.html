@@ -2273,10 +2273,12 @@ window.addEventListener('offline', () => { updateStatusCloud('offline'); });
 
 
 setupTapLogo();
-setupModeKaryawan();
+if (localStorage.getItem('stokjas_admin') === '1') {
+  setupModeAdmin();
+} else {
+  setupModeKaryawan();
+}
 render();
-var filterModelAktif = 'semua';
-
 var filterModelAktif = null;
 
 function renderModelFilterBar() {
