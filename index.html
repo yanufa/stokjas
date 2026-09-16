@@ -679,7 +679,7 @@ if (masukGudang) {
   masukGudang.value = 'langen';
   masukGudang.disabled = true;
 }
-  
+ 
   // Tombol logout PIN (kalau ada)
   console.log('✅ Mode Karyawan aktif');
   render();
@@ -938,33 +938,42 @@ async function ambilDariCloud() {
       return;
     }
 
+    // Cek apakah lokal sudah ada data
+    var lokalAdaData = (stok && Object.keys(stok).length > 0) || (riwayat && riwayat.length > 0);
+
+    if (lokalAdaData) {
+      // Lokal sudah ada data → JANGAN timpa, kirim ulang ke cloud
+      console.log('ℹ️ Lokal ada data, skip pull. Push ke cloud...');
+      await kirimKeCloud();
+      updateStatusCloud('ok');
+      return;
+    }
+
+    // Lokal kosong → baru ambil dari cloud
     if (json.ukuranList && json.ukuranList.length > 0) {
       ukuranList = json.ukuranList;
     }
     if (json.stok && Object.keys(json.stok).length > 0) {
       stok = json.stok;
-riwayat = json.riwayat || [];
-// Migrasi data cloud (kalau ada yang format lama)
-Object.keys(stok).forEach(function(key) {
-  var item = stok[key];
-  if (!item.stok) {
-    item.stok = { langen: item.sizes || {}, wage: {} };
-    delete item.sizes;
-  }
-  if (!item.stok.langen) item.stok.langen = {};
-  if (!item.stok.wage) item.stok.wage = {};
-  ukuranList.forEach(function(u) {
-    if (typeof item.stok.langen[u] !== 'number') item.stok.langen[u] = 0;
-    if (typeof item.stok.wage[u] !== 'number') item.stok.wage[u] = 0;
-  });
-});
+      riwayat = json.riwayat || [];
+      Object.keys(stok).forEach(function(key) {
+        var item = stok[key];
+        if (!item.stok) {
+          item.stok = { langen: item.sizes || {}, wage: {} };
+          delete item.sizes;
+        }
+        if (!item.stok.langen) item.stok.langen = {};
+        if (!item.stok.wage) item.stok.wage = {};
+        ukuranList.forEach(function(u) {
+          if (typeof item.stok.langen[u] !== 'number') item.stok.langen[u] = 0;
+          if (typeof item.stok.wage[u] !== 'number') item.stok.wage[u] = 0;
+        });
+      });
       localStorage.setItem('ukuranList_v3', JSON.stringify(ukuranList));
       localStorage.setItem('stok_v3', JSON.stringify(stok));
       localStorage.setItem('riwayat_v3', JSON.stringify(riwayat));
       render();
       updateStatusCloud('ok');
-    } else if (Object.keys(stok).length > 0) {
-      await kirimKeCloud();
     } else {
       updateStatusCloud('ok');
     }
@@ -973,7 +982,6 @@ Object.keys(stok).forEach(function(key) {
     updateStatusCloud('error', 'Koneksi gagal');
   }
 }
-
 function updateStatusCloud(status, pesan) {
   let el = document.getElementById('cloudStatus');
   if (!el) {
