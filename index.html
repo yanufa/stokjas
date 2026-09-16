@@ -71,21 +71,30 @@
   .size-item input { text-align: center; padding: 8px; font-size: 14px; }
   .model-group { margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
   .model-header {
-    background: #34495e; color: white; padding: 10px 15px;
-    font-weight: 700; font-size: 15px; display: flex;
-    justify-content: space-between; align-items: center;
-  }
+  background: #34495e; color: white; padding: 0.875rem 1.125rem;
+  font-weight: 800; font-size: 1.125rem; display: flex;
+  justify-content: space-between; align-items: center;
+}
   .warna-row { border-bottom: 1px solid #eee; padding: 10px; }
   .warna-row:last-child { border-bottom: none; }
-  .warna-title { font-weight: 700; color: #8e44ad; margin-bottom: 8px; font-size: 14px; }
-  .size-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .size-chip {
-    background: #ecf0f1; border-radius: 6px; padding: 5px 10px;
-    font-size: 12px; display: flex; align-items: center; gap: 6px;
-  }
-  .size-chip b { color: #2c3e50; }
-  .size-chip span { color: #27ae60; font-weight: 700; }
-  .size-chip.habis span { color: #e74c3c; }
+ .warna-title { font-weight: 800; color: #8e44ad; margin-bottom: 0.625rem; font-size: 1.0625rem; }
+ .size-chip {
+  background: #ecf0f1; border-radius: 0.625rem; padding: 0.75rem 1rem;
+  font-size: 1rem; display: flex; align-items: center; gap: 0.625rem;
+  min-width: 6.25rem;
+}
+.size-chips {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+}
+.size-chip b { color: #2c3e50; font-size: 1.4rem; font-weight: 800; }
+.size-chip span { color: #27ae60; font-weight: 900; font-size: 1.15rem; }
+.size-chip small { font-size: 0.75rem !important; font-weight: 700; color: #333 !important; }
+.size-chip.habis span { color: #e74c3c; font-weight: 900; }
+.size-chip.segera span { color: #e67e22; font-weight: 900; }
+.size-chip.rendah span { color: #f39c12; font-weight: 900; }
   .total-row { background: #ecf0f1; padding: 8px 15px; font-weight: 700; font-size: 13px; color: #2c3e50; }
   select.besar { font-size: 15px; }
   .hilang { display: none; }
@@ -181,14 +190,18 @@ body.mode-karyawan .admin-only { display: none !important; }
   text-align: left; font-size: 12px; font-weight: 700;
 }
 .tabel-ukuran td {
-  padding: 10px 12px; border-bottom: 1px solid #eee;
-  font-size: 14px; vertical-align: top;
+  padding: 0.75rem 1rem; border-bottom: 1px solid #eee;
+  font-size: 1rem; vertical-align: top;
 }
 .tabel-ukuran tr:last-child td { border-bottom: none; }
 .tabel-ukuran tr:hover td { background: #f9f9f9; }
 .tabel-ukuran .size-cell {
-  font-weight: 700; font-size: 16px; color: #2c3e50;
-  text-align: center; width: 70px;
+  font-weight: 800; font-size: 1.375rem; color: #2c3e50;
+  text-align: center; width: 5rem;
+}
+.warna-tag {
+  display: inline-block; padding: 0.375rem 0.875rem; border-radius: 0.5rem;
+  margin: 0.1875rem 0.3125rem 0.1875rem 0; font-size: 0.9375rem; font-weight: 700;
 }
 .warna-tag {
   display: inline-block; padding: 4px 10px; border-radius: 6px;
@@ -196,10 +209,73 @@ body.mode-karyawan .admin-only { display: none !important; }
 }
 .warna-habis { background: #f8d7da; color: #721c24; }
 .warna-sisa-satu { background: #ffe0b2; color: #8a4b00; }
-  @media (max-width: 600px) {
-    .row, .row3, .row4 { grid-template-columns: 1fr; }
-    h1 { font-size: 20px; }
+ @media (max-width: 600px) {
+  .row, .row3, .row4 { grid-template-columns: 1fr; }
+  h1 { font-size: 20px; }
+  .size-chip span { font-size: 1.75rem !important; }
+  .size-chip b { font-size: 1.25rem !important; }
+  .size-chip small { font-size: 0.875rem !important; }
+  .size-chip { padding: 1rem 1.125rem !important; min-width: 6.875rem; }
+  
+  /* TAMBAHAN TAHAP 1 UNTUK HP */
+  .warna-title small {
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.6px !important;
   }
+  .warna-title {
+    font-size: 1.25rem !important;
+    letter-spacing: 1.5px !important;
+  }
+  .model-header {
+    font-size: 1.15rem !important;
+    letter-spacing: 1.8px !important;
+    padding: 0.75rem 1rem !important;
+  }
+}
+  /* 1. Tulisan (Langen: 0 · Wage: 0 · Total: 0) */
+.warna-title small {
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  color: #1a1a1a !important;
+}
+
+/* 2. Nama warna (HITAM, dll) */
+.warna-title {
+  font-size: 1.15rem !important;
+  letter-spacing: 1.2px !important;
+}
+
+/* 3. Huruf kapital diberi jarak lebih besar */
+h1, h2, h3, h4, th, label,
+.model-header,
+.tab-btn,
+.size-chip b {
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+/* 4. Khusus header model */
+.model-header {
+  letter-spacing: 2px !important;
+  font-size: 1.2rem !important;
+}
+
+/* 5. Judul tab */
+.tab-btn {
+  letter-spacing: 1px !important;
+}
+/* FILTER MODEL DI TAB STOK */
+.model-filter-btn {
+  padding: 8px 14px; border: 2px solid #2c3e50; background: white;
+  color: #2c3e50; border-radius: 20px; cursor: pointer;
+  font-weight: 700; font-size: 13px; transition: .2s;
+}
+.model-filter-btn:hover { background: #ecf0f1; }
+.model-filter-btn.active {
+  background: #2c3e50; color: white;
+}
 </style>
 <!-- ================= MODE BADGE (KIRI ATAS) ================= -->
 <div id="modeBadge" class="mode-badge-karyawan">👨‍🏭 Mode Karyawan</div>
@@ -253,8 +329,9 @@ body.mode-karyawan .admin-only { display: none !important; }
   <!-- ================= TAB STOK ================= -->
   <div id="stok" class="tab-content active">
     <div class="card">
-      <h3>📋 Stok Jas Yanufa</h3>
-      <div id="daftarStok"></div>
+     <h3>📋 Stok Jas Yanufa</h3>
+<div id="modelFilterBar" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;"></div>
+<div id="daftarStok"></div>
 
       <div class="card" style="margin-top:20px; margin-bottom:0;">
         <h3>📏 Produksi Per Ukuran</h3>
@@ -388,12 +465,7 @@ body.mode-karyawan .admin-only { display: none !important; }
   <div id="laporan" class="tab-content">
     <div class="card">
       <h3>📅 Periode Laporan</h3>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
-        <button class="filter-btn" onclick="setPeriode('hari-ini', this)">Hari Ini</button>
-        <button class="filter-btn active" onclick="setPeriode('7-hari', this)">7 Hari</button>
-        <button class="filter-btn" onclick="setPeriode('30-hari', this)">30 Hari</button>
-        <button class="filter-btn" onclick="setPeriode('semua', this)">Semua</button>
-      </div>
+     
       <div style="display:flex; gap:8px; flex-wrap:wrap; border-top:1px solid #eee; padding-top:10px;">
         <span style="align-self:center; font-size:13px; color:#666;">Gudang:</span>
         <button class="filter-btn active" onclick="setGudangFilter('semua', this)">📊 Semua</button>
@@ -405,34 +477,47 @@ body.mode-karyawan .admin-only { display: none !important; }
     </div>
 
     <div class="card">
-      <h3>🏭 Laporan Produksi (Barang Masuk)</h3>
-      <div id="laporanProduksi"></div>
-      <button class="primary blue" onclick="exportCSV('produksi')" style="margin-top:15px;">📤 Export CSV Produksi</button>
-    </div>
+  <h3>🏭 Laporan Barang Masuk (Hasil Produksi)</h3>
+  <div id="laporanProduksi"></div>
+  <button class="primary blue" onclick="exportCSV('produksi')" style="margin-top:15px;">📤 Export CSV Produksi</button>
+</div>
 
-    <div class="card">
-      <h3>💰 Laporan Penjualan (Barang Keluar)</h3>
-      <div id="laporanPenjualan"></div>
-      <button class="primary blue" onclick="exportCSV('penjualan')" style="margin-top:15px;">📤 Export CSV Penjualan</button>
-    </div>
+<div class="card">
+  <h3>🔄 Laporan Barang Masuk (Barang Returan)</h3>
+  <div id="laporanReturan"></div>
+  <button class="primary blue" onclick="exportCSV('retur')" style="margin-top:15px;">📤 Export CSV Returan</button>
+</div>
 
-    <div class="card">
-      <h3>⚠️ Perlu Diproduksi Lagi</h3>
-      <div id="rekomendasiRestock"></div>
-     </div>
-     </div>
+<div class="card">
+  <h3>💰 Laporan Barang Keluar (Penjualan Online)</h3>
+  <div id="laporanPenjualan"></div>
+  <button class="primary blue" onclick="exportCSV('penjualan')" style="margin-top:15px;">📤 Export CSV Penjualan</button>
+</div>
+    </div>
+    
+   </div>
     
   <!-- ================= TAB RIWAYAT ================= -->
-  <div id="riwayat" class="tab-content">
-    <div class="card">
-      <h3>📜 Riwayat Transaksi</h3>
-      <table>
-        <thead><tr><th>Waktu</th><th>Model</th><th>Warna</th><th>Ukuran</th><th>Gudang</th><th>Jenis</th><th>Qty</th></tr></thead>
-        <tbody id="tabelRiwayat"></tbody>
-      </table>
-      <button class="primary danger" style="margin-top:15px;" onclick="hapusRiwayat()">🗑️ Hapus Semua Riwayat</button>
+<div id="riwayat" class="tab-content">
+  <div class="card">
+    <h3>📜 Riwayat Transaksi</h3>
+    
+    <!-- PANEL UNDO -->
+    <div id="undoPanel" style="display:none; background:#fff3cd; border-left:4px solid #f39c12; padding:12px; border-radius:8px; margin-bottom:12px;">
+      <div style="font-size:13px; color:#856404; font-weight:700; margin-bottom:6px;">↩️ Transaksi Terakhir:</div>
+      <div id="undoInfo" style="font-size:13px; color:#333; margin-bottom:8px;"></div>
+      <button class="primary orange" style="padding:10px; font-size:14px;" onclick="undoTransaksiTerakhir()">↩️ Batalkan Transaksi Terakhir</button>
     </div>
+    
+    <div id="msgUndo" class="msg"></div>
+    
+    <table>
+      <thead><tr><th>Waktu</th><th>Model</th><th>Warna</th><th>Ukuran</th><th>Gudang</th><th>Jenis</th><th>Qty</th></tr></thead>
+      <tbody id="tabelRiwayat"></tbody>
+    </table>
+    <button class="primary danger" style="margin-top:15px;" onclick="hapusRiwayat()">🗑️ Hapus Semua Riwayat</button>
   </div>
+</div>
   
   <!-- ================= TAB SETTING ================= -->
   <div id="setting" class="tab-content">
@@ -594,20 +679,20 @@ function setupModeAdmin() {
   localStorage.setItem('stokjas_admin', '1');
   document.body.classList.remove('mode-karyawan');
   
-  // Update badge
   var badge = document.getElementById('modeBadge');
   var toggle = document.getElementById('modeToggle');
   if (badge) badge.style.display = 'none';
   if (toggle) toggle.classList.add('show');
   
-  // Tampilkan tab admin-only
   document.querySelectorAll('.admin-only').forEach(function(el) {
     el.style.display = '';
   });
   
-  // Buka dropdown gudang di tab Masuk
   var masukGudang = document.getElementById('masukGudang');
-  if (masukGudang) masukGudang.disabled = false;
+  if (masukGudang) {
+    masukGudang.value = 'wage';
+    masukGudang.disabled = true;
+  }
   
   console.log('🔓 Mode Admin aktif');
   render();
@@ -988,11 +1073,17 @@ function renderRingkasanPerUkuran() {
   var el = document.getElementById('ringkasanPerUkuran');
   if (!el) return;
 
-  var models = getModelList();
-  if (models.length === 0) {
-    el.innerHTML = '<div class="empty">Belum ada data.</div>';
-    return;
-  }
+ var allModels = getModelList();
+if (allModels.length === 0) {
+  el.innerHTML = '<div class="empty">Belum ada data.</div>';
+  return;
+}
+
+// Filter sesuai model yang dipilih di tab Stok
+var models = allModels;
+if (filterModelAktif && allModels.indexOf(filterModelAktif) !== -1) {
+  models = [filterModelAktif];
+}
 
   var html = '';
   var adaKritisTotal = false;
@@ -1055,6 +1146,9 @@ function renderRingkasanPerUkuran() {
 function renderStokView() {
   var el = document.getElementById('daftarStok');
   var models = getModelList();
+if (filterModelAktif !== 'semua') {
+  models = models.filter(function(m) { return m === filterModelAktif; });
+}
 
   if (models.length === 0) {
     el.innerHTML = '<div class="empty">Belum ada data. Tambah Model & Warna dulu di atas.</div>';
@@ -1124,21 +1218,24 @@ function renderRiwayat() {
     var gudangLabel = r.gudang === 'wage' ? '🏭 Wage' : '🏭 Langen';
     var gudangBg = r.gudang === 'wage' ? '#9b59b6' : '#3498db';
     
-    // Tentukan jenis label & warna
-    var jenisLabel = '';
-    var jenisBg = '';
-    if (r.jenis === 'Masuk') {
-      if (r.jenisDetail === 'retur') {
-        jenisLabel = '🔄 Retur';
-        jenisBg = '#f39c12';  // orange
-      } else {
-        jenisLabel = '🏭 Produksi';
-        jenisBg = '#27ae60';  // hijau
-      }
-    } else {
-      jenisLabel = '⬆️ Keluar';
-      jenisBg = '#e74c3c';  // merah
-    }
+   // Tentukan jenis label & warna
+var jenisLabel = '';
+var jenisBg = '';
+if (r.jenis === 'Masuk') {
+  if (r.jenisDetail === 'retur') {
+    jenisLabel = '🔄 Retur';
+    jenisBg = '#f39c12';  // orange
+  } else {
+    jenisLabel = '🏭 Produksi';
+    jenisBg = '#27ae60';  // hijau
+  }
+} else if (r.jenis === 'Koreksi') {
+  jenisLabel = '✏️ Koreksi';
+  jenisBg = '#8e44ad';  // ungu
+} else {
+  jenisLabel = '⬆️ Keluar';
+  jenisBg = '#e74c3c';  // merah
+}
     
     return '<tr>' +
       '<td><small>' + r.waktu + '</small></td>' +
@@ -1147,7 +1244,11 @@ function renderRiwayat() {
       '<td>' + r.ukuran + '</td>' +
       '<td><span style="background:' + gudangBg + '; color:white; padding:2px 6px; border-radius:4px; font-size:11px;">' + gudangLabel + '</span></td>' +
       '<td><span style="background:' + jenisBg + '; color:white; padding:3px 8px; border-radius:20px; font-size:11px; font-weight:600;">' + jenisLabel + '</span></td>' +
-      '<td><strong>' + (r.jenis === 'Masuk' ? '+' : '-') + r.jumlah + '</strong></td>' +
+      '<td><strong>' + 
+  (r.jenis === 'Masuk' ? '+' : 
+   r.jenis === 'Koreksi' ? (r.selisih > 0 ? '+' : '-') : '-') + 
+  r.jumlah + 
+'</strong></td>' +
       '</tr>';
   }).join('');
 }
@@ -1194,7 +1295,10 @@ function ambilSizeValues(containerId) {
 
 function prosesMasuk() {
   var jenis = document.getElementById('masukJenis').value;
-  var gudang = document.getElementById('masukGudang').value;
+  var masukGudangEl = document.getElementById('masukGudang');
+  // Paksa ambil value walaupun dropdown disabled
+  var gudang = masukGudangEl ? masukGudangEl.value : 'langen';
+     console.log('📥 prosesMasuk - gudang:', gudang, '| disabled:', masukGudangEl ?          masukGudangEl.disabled : '?');
   var model = document.getElementById('masukModel').value;
   var warna = document.getElementById('masukWarna').value;
   var ket = document.getElementById('ketMasuk').value.trim();
@@ -1341,6 +1445,95 @@ function hapusRiwayat() {
 }
 
 // ==========================================
+// UNDO TRANSAKSI TERAKHIR (TAHAP 2)
+// ==========================================
+function getTransaksiTerakhir() {
+  if (riwayat.length === 0) return null;
+  return riwayat[0]; // riwayat di-unshift, jadi index 0 = terbaru
+}
+
+function renderUndoPanel() {
+  var panel = document.getElementById('undoPanel');
+  var info = document.getElementById('undoInfo');
+  if (!panel || !info) return;
+
+  var last = getTransaksiTerakhir();
+  if (!last) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = 'block';
+  
+  var jenisLabel = '';
+  if (last.jenis === 'Masuk') {
+    if (last.jenisDetail === 'retur') {
+      jenisLabel = '🔄 Retur';
+    } else {
+      jenisLabel = '🏭 Produksi';
+    }
+  } else {
+    jenisLabel = '⬆️ Keluar';
+  }
+  
+  var gudangLabel = last.gudang === 'wage' ? '🏭 Wage' : '🏭 Langen';
+  var tanda = last.jenis === 'Masuk' ? '+' : '-';
+  
+  info.innerHTML = 
+    '<strong>' + last.model + ' - ' + last.warna + ' - ' + last.ukuran + '</strong><br>' +
+    jenisLabel + ' · ' + gudangLabel + ' · <strong>' + tanda + last.jumlah + ' pcs</strong><br>' +
+    '<small style="color:#666;">🕐 ' + last.waktu + '</small>';
+}
+
+function undoTransaksiTerakhir() {
+  var last = getTransaksiTerakhir();
+  if (!last) {
+    showMsg('msgUndo', '❌ Tidak ada transaksi untuk dibatalkan.', 'error');
+    return;
+  }
+
+  var konfirmasi = 'Batalkan transaksi terakhir?\n\n' +
+    '📦 Model: ' + last.model + '\n' +
+    '🎨 Warna: ' + last.warna + '\n' +
+    '📏 Ukuran: ' + last.ukuran + '\n' +
+    '🏭 Gudang: ' + (last.gudang === 'wage' ? 'Wage' : 'Langen') + '\n' +
+    '📊 Jenis: ' + (last.jenis === 'Masuk' ? (last.jenisDetail === 'retur' ? 'Retur' : 'Produksi') : 'Keluar') + '\n' +
+    '🔢 Jumlah: ' + last.jumlah + ' pcs\n\n' +
+    'Stok akan dikembalikan seperti sebelumnya.';
+
+  if (!confirm(konfirmasi)) return;
+
+  var key = keyOf(last.model, last.warna);
+  var item = stok[key];
+
+  if (!item) {
+    showMsg('msgUndo', '❌ Data model/warna tidak ditemukan.', 'error');
+    return;
+  }
+
+  var gudang = last.gudang || 'langen';
+  var current = getStok(item, gudang, last.ukuran);
+
+  // Kembalikan stok: kalau Masuk → kurangi, kalau Keluar → tambah
+  if (last.jenis === 'Masuk') {
+    if (current < last.jumlah) {
+      showMsg('msgUndo', '⚠️ Stok tidak cukup untuk dibatalkan (sudah berkurang). Sisa: ' + current + ' pcs.', 'error');
+      return;
+    }
+    setStok(item, gudang, last.ukuran, current - last.jumlah);
+  } else {
+    setStok(item, gudang, last.ukuran, current + last.jumlah);
+  }
+
+  // Hapus dari riwayat
+  riwayat.shift(); // hapus elemen pertama
+
+  simpan();
+  render();
+  
+  showMsg('msgUndo', '✅ Transaksi ' + last.model + ' - ' + last.warna + ' - ' + last.ukuran + ' berhasil dibatalkan.', 'success');
+}
+// ==========================================
 // BACKUP / RESTORE
 // ==========================================
 function backupJSON() {
@@ -1381,9 +1574,11 @@ function restoreJSON(event) {
 // RENDER SEMUA
 // ==========================================
 function render() {
+  renderModelFilterBar();
   renderStokView();
   renderRingkasanPerUkuran();
   renderRiwayat();
+  renderUndoPanel();
   document.getElementById('daftarUkuran').textContent = ukuranList.join(', ');
   document.getElementById('inputUkuran').value = ukuranList.join(', ');
 
@@ -1508,6 +1703,7 @@ function renderLaporan() {
   }
 
   renderLaporanProduksi(data);
+  renderLaporanReturan(data);
   renderLaporanPenjualan(data);
   renderRestock();
 }
@@ -1559,6 +1755,46 @@ function renderLaporanProduksi(data) {
   var hariList = Object.keys(perHari).sort();
   hariList.forEach(function(h) {
     html += '<tr><td>' + h + '</td><td><strong>' + perHari[h] + ' pcs</strong></td></tr>';
+  });
+  html += '</tbody></table>';
+
+  el.innerHTML = html;
+}
+function renderLaporanReturan(data) {
+  var el = document.getElementById('laporanReturan');
+  if (!el) return;
+  var retur = data.filter(function(r) { return r.jenis === 'Masuk' && r.jenisDetail === 'retur'; });
+
+  if (retur.length === 0) {
+    el.innerHTML = '<div class="empty">Tidak ada returan pada periode ini.</div>';
+    return;
+  }
+
+  var perModel = {};
+  var perGudang = { langen: 0, wage: 0 };
+  var total = 0;
+
+  retur.forEach(function(r) {
+    total += r.jumlah;
+    perModel[r.model] = (perModel[r.model] || 0) + r.jumlah;
+    perGudang[r.gudang || 'langen'] = (perGudang[r.gudang || 'langen'] || 0) + r.jumlah;
+  });
+
+  var html = '';
+  html += '<div style="background:#fff3cd; padding:15px; border-radius:8px; margin-bottom:15px;">';
+  html += '<div style="font-size:14px; color:#856404;">Total Barang Returan:</div>';
+  html += '<div style="font-size:36px; font-weight:700; color:#e67e22;">' + total + ' pcs</div>';
+  if (gudangFilter === 'semua') {
+    html += '<div style="font-size:13px; color:#856404; margin-top:5px;">🏭 Langen: <strong>' + perGudang.langen + ' pcs</strong> · 🏭 Wage: <strong>' + perGudang.wage + ' pcs</strong></div>';
+  }
+  html += '</div>';
+
+  html += '<h4 style="margin:15px 0 8px; color:#2c3e50;">Per Model</h4>';
+  html += '<table><thead><tr><th>Model</th><th>Total Pcs</th><th>Persentase</th></tr></thead><tbody>';
+  var models = Object.keys(perModel).sort(function(a, b) { return perModel[b] - perModel[a]; });
+  models.forEach(function(m) {
+    var pct = total > 0 ? Math.round((perModel[m] / total) * 100) : 0;
+    html += '<tr><td><span class="kode-badge">' + m + '</span></td><td><strong>' + perModel[m] + ' pcs</strong></td><td>' + pct + '%</td></tr>';
   });
   html += '</tbody></table>';
 
@@ -1670,13 +1906,13 @@ function exportCSV(tipe) {
   var data = filterRiwayat();
   var rows = [];
   rows.push(['Waktu', 'Model', 'Warna', 'Ukuran', 'Gudang', 'Jumlah', 'Keterangan']);
-  var filterJenis = (tipe === 'produksi') ? 'Masuk' : 'Keluar';
-  var filterDetail = (tipe === 'produksi') ? 'produksi' : '';
-  data.filter(function(r) {
-    if (r.jenis !== filterJenis) return false;
-    if (tipe === 'produksi' && r.jenisDetail === 'retur') return false;
-    return true;
-  }).forEach(function(r) {
+  var filterJenis = (tipe === 'penjualan') ? 'Keluar' : 'Masuk';
+data.filter(function(r) {
+  if (r.jenis !== filterJenis) return false;
+  if (tipe === 'produksi' && r.jenisDetail === 'retur') return false;
+  if (tipe === 'retur' && r.jenisDetail !== 'retur') return false;
+  return true;
+}).forEach(function(r) {
     var gudangLabel = r.gudang === 'wage' ? 'Wage' : 'Langen';
     rows.push([r.waktu, r.model, r.warna, r.ukuran, gudangLabel, r.jumlah, r.ket || '']);
   });
@@ -1855,6 +2091,117 @@ function cfReset() {
   document.getElementById('cfHasil').innerHTML = '';
   cfHasilTerakhir = null;
 }
+// ==========================================
+// KOREKSI STOK (TAHAP 3)
+// ==========================================
+function cfKoreksiStok() {
+  var gudang = document.getElementById('cfGudang').value;
+  var model = document.getElementById('cfModel').value;
+  var warna = document.getElementById('cfWarna').value;
+
+  if (!gudang || !model || !warna) {
+    alert('❌ Pilih Gudang, Model, dan Warna dulu!');
+    return;
+  }
+
+  var key = keyOf(model, warna);
+  var item = stok[key];
+  if (!item) {
+    alert('❌ Data tidak ditemukan!');
+    return;
+  }
+
+  // Ambil semua input fisik
+  var inputs = document.querySelectorAll('#cfSizeTable input[data-cfsize]');
+  if (inputs.length === 0) {
+    alert('❌ Belum ada data ukuran. Klik "Hitung Selisih" dulu.');
+    return;
+  }
+
+  // Hitung total selisih
+  var totalSelisih = 0;
+  var detailSelisih = [];
+  var adaPerubahan = false;
+
+  inputs.forEach(function(inp) {
+    var ukuran = inp.dataset.cfsize;
+    var sistem = parseInt(inp.dataset.sistem) || 0;
+    var fisik = parseInt(inp.value) || 0;
+    var selisih = fisik - sistem;
+
+    if (selisih !== 0) {
+      adaPerubahan = true;
+      totalSelisih += selisih;
+      detailSelisih.push({
+        ukuran: ukuran,
+        sistem: sistem,
+        fisik: fisik,
+        selisih: selisih
+      });
+    }
+  });
+
+  if (!adaPerubahan) {
+    alert('✅ Tidak ada selisih. Stok sudah sesuai fisik.');
+    return;
+  }
+
+  // Konfirmasi
+  var konfirmasi = '✏️ KOREKSI STOK\n\n' +
+    '📦 Model: ' + model + '\n' +
+    '🎨 Warna: ' + warna + '\n' +
+    '🏭 Gudang: ' + GUDANG_LABEL[gudang] + '\n\n' +
+    'Perubahan:\n';
+
+  detailSelisih.forEach(function(d) {
+    var tanda = d.selisih > 0 ? '+' : '';
+    konfirmasi += '• ' + d.ukuran + ': ' + d.sistem + ' → ' + d.fisik + ' (' + tanda + d.selisih + ')\n';
+  });
+
+  konfirmasi += '\nTotal selisih: ' + (totalSelisih > 0 ? '+' : '') + totalSelisih + ' pcs\n\n' +
+    'Stok sistem akan disesuaikan dengan stok fisik. Lanjutkan?';
+
+  if (!confirm(konfirmasi)) return;
+
+  // Simpan riwayat koreksi
+  var waktu = new Date().toLocaleString('id-ID');
+  detailSelisih.forEach(function(d) {
+    riwayat.unshift({
+      waktu: waktu,
+      model: model,
+      warna: warna,
+      ukuran: d.ukuran,
+      jenis: 'Koreksi',
+      jenisDetail: 'opname',
+      jumlah: Math.abs(d.selisih),
+      selisih: d.selisih,
+      sistemLama: d.sistem,
+      fisikBaru: d.fisik,
+      gudang: gudang,
+      ket: 'Koreksi opname'
+    });
+  });
+
+  // Update stok sesuai fisik
+  detailSelisih.forEach(function(d) {
+    setStok(item, gudang, d.ukuran, d.fisik);
+  });
+
+  simpan();
+  render();
+
+  // Tampilkan pesan sukses
+  var hasil = document.getElementById('cfHasil');
+  if (hasil) {
+    hasil.innerHTML = '<div class="cf-alert cf-alert-ok">✅ Koreksi berhasil! ' +
+      detailSelisih.length + ' ukuran disesuaikan. Total selisih: ' +
+      (totalSelisih > 0 ? '+' : '') + totalSelisih + ' pcs</div>';
+  }
+
+  alert('✅ Koreksi stok berhasil!\n\n' +
+    detailSelisih.length + ' ukuran disesuaikan.\n' +
+    'Total selisih: ' + (totalSelisih > 0 ? '+' : '') + totalSelisih + ' pcs');
+}
 
 function cfExportCSV() {
   if (!cfHasilTerakhir) {
@@ -1904,6 +2251,36 @@ window.addEventListener('offline', () => { updateStatusCloud('offline'); });
 setupTapLogo();
 setupModeKaryawan();
 render();
+var filterModelAktif = 'semua';
+
+var filterModelAktif = null;
+
+function renderModelFilterBar() {
+  var bar = document.getElementById('modelFilterBar');
+  if (!bar) return;
+
+  var models = getModelList();
+  if (models.length === 0) { bar.innerHTML = ''; return; }
+
+  // Auto-pilih model pertama kalau belum ada
+  if (!filterModelAktif || models.indexOf(filterModelAktif) === -1) {
+    filterModelAktif = models[0];
+  }
+
+  var html = '';
+  models.forEach(function(m) {
+    var aktif = filterModelAktif === m ? 'active' : '';
+    html += '<button class="model-filter-btn ' + aktif + '" onclick="setFilterModel(\'' + m.replace(/'/g, "\\'") + '\')">📦 ' + m + '</button>';
+  });
+  bar.innerHTML = html;
+}
+
+function setFilterModel(model) {
+  filterModelAktif = model;
+  renderStokView();
+  renderRingkasanPerUkuran();   // <-- TAMBAH INI
+  renderModelFilterBar();
+}
 </script>
 </div>
 </body>
