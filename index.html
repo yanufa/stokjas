@@ -699,12 +699,15 @@ function setupModeAdmin() {
     el.style.display = '';
   });
   
-  gudangAktif = 'wage';
 var masukGudang = document.getElementById('masukGudang');
 if (masukGudang) {
-  gudangAktif = 'wage';
   masukGudang.value = 'wage';
-  masukGudang.disabled = true;
+  masukGudang.disabled = false;
+}
+var keluarGudang = document.getElementById('keluarGudang');
+if (keluarGudang) {
+  keluarGudang.value = 'wage';
+  keluarGudang.disabled = false;
 }
   
   console.log('🔓 Mode Admin aktif');
