@@ -650,6 +650,7 @@ function totalStokGudang(item, gudang) {
 // MODE KARYAWAN / ADMIN
 // ==========================================
 var isAdmin = false;
+var gudangAktif = 'langen';
 var ADMIN_PIN = '8008';
 var tapCount = 0;
 var tapTimer = null;
@@ -672,11 +673,12 @@ function setupModeKaryawan() {
   });
   
   // Kunci dropdown gudang di tab Masuk
-  var masukGudang = document.getElementById('masukGudang');
-  if (masukGudang) {
-    masukGudang.value = 'langen';
-    masukGudang.disabled = true;
-  }
+  gudangAktif = 'langen';
+var masukGudang = document.getElementById('masukGudang');
+if (masukGudang) {
+  masukGudang.value = 'langen';
+  masukGudang.disabled = true;
+}
   
   // Tombol logout PIN (kalau ada)
   console.log('✅ Mode Karyawan aktif');
@@ -697,11 +699,12 @@ function setupModeAdmin() {
     el.style.display = '';
   });
   
-  var masukGudang = document.getElementById('masukGudang');
-  if (masukGudang) {
-    masukGudang.value = 'wage';
-    masukGudang.disabled = true;
-  }
+  gudangAktif = 'wage';
+var masukGudang = document.getElementById('masukGudang');
+if (masukGudang) {
+  masukGudang.value = 'wage';
+  masukGudang.disabled = true;
+}
   
   console.log('🔓 Mode Admin aktif');
   render();
@@ -1304,10 +1307,7 @@ function ambilSizeValues(containerId) {
 
 function prosesMasuk() {
   var jenis = document.getElementById('masukJenis').value;
-  var masukGudangEl = document.getElementById('masukGudang');
-  // Paksa ambil value walaupun dropdown disabled
-  var gudang = masukGudangEl ? masukGudangEl.value : 'langen';
-     console.log('📥 prosesMasuk - gudang:', gudang, '| disabled:', masukGudangEl ?          masukGudangEl.disabled : '?');
+  var gudang = gudangAktif;
   var model = document.getElementById('masukModel').value;
   var warna = document.getElementById('masukWarna').value;
   var ket = document.getElementById('ketMasuk').value.trim();
