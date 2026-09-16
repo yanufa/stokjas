@@ -1309,7 +1309,7 @@ function ambilSizeValues(containerId) {
 
 function prosesMasuk() {
   var jenis = document.getElementById('masukJenis').value;
-  var gudang = isAdmin ? 'wage' : 'langen';
+  var gudang = (localStorage.getItem('stokjas_admin') === '1') ? 'wage' : 'langen';
   console.log('🔍 DEBUG prosesMasuk - isAdmin:', isAdmin, '| gudang:', gudang);
   var model = document.getElementById('masukModel').value;
   var warna = document.getElementById('masukWarna').value;
