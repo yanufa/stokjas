@@ -81,13 +81,13 @@
  .size-chip {
   background: #ecf0f1; border-radius: 0.625rem; padding: 0.75rem 1rem;
   font-size: 1rem; display: flex; align-items: center; gap: 0.625rem;
-  min-width: 6.25rem;
 }
 .size-chips {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
 }
+
 }
 .size-chip b { color: #2c3e50; font-size: 1.4rem; font-weight: 800; }
 .size-chip span { color: #27ae60; font-weight: 900; font-size: 1.15rem; }
@@ -212,12 +212,21 @@ body.mode-karyawan .admin-only { display: none !important; }
  @media (max-width: 600px) {
   .row, .row3, .row4 { grid-template-columns: 1fr; }
   h1 { font-size: 20px; }
-  .size-chip span { font-size: 1.75rem !important; }
-  .size-chip b { font-size: 1.25rem !important; }
-  .size-chip small { font-size: 0.875rem !important; }
-  .size-chip { padding: 1rem 1.125rem !important; min-width: 6.875rem; }
   
-  /* TAMBAHAN TAHAP 1 UNTUK HP */
+  /* Chip ukuran: 3 kolom, ramping */
+  .size-chips {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+  }
+  .size-chip {
+    min-width: 0 !important;
+    padding: 0.5rem 0.4rem !important;
+    gap: 4px !important;
+  }
+  .size-chip b { font-size: 1.4rem !important; }
+  .size-chip span { font-size: 1.15rem !important; }
+  .size-chip small { font-size: 0.7rem !important; letter-spacing: 0 !important; }
+  
   .warna-title small {
     font-size: 1.15rem !important;
     font-weight: 800 !important;
