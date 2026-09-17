@@ -942,17 +942,28 @@ async function ambilDariCloud() {
       return;
     }
 
-    // CLOUD SELALU MENANG — kalau cloud punya data, tarik & timpa lokal
+    // Cek apakah data cloud BEDA dengan lokal
+    var cloudStokStr = JSON.stringify(json.stok || {});
+    var cloudRiwayatStr = JSON.stringify(json.riwayat || []);
+    var lokalStokStr = JSON.stringify(stok);
+    var lokalRiwayatStr = JSON.stringify(riwayat);
+
+    var adaBeda = (cloudStokStr !== lokalStokStr) || (cloudRiwayatStr !== lokalRiwayatStr);
+
+    // Kalau SAMA → tidak perlu render, cukup badge hijau
+    if (!adaBeda) {
+      updateStatusCloud('ok');
+      return;
+    }
+
+    // Kalau BEDA → timpa & render
+    if (json.ukuranList && json.ukuranList.length > 0) {
+      ukuranList = json.ukuranList;
+    }
     if (json.stok && Object.keys(json.stok).length > 0) {
-      console.log('⬇️ Tarik dari cloud (cloud menang)');
-      
-      if (json.ukuranList && json.ukuranList.length > 0) {
-        ukuranList = json.ukuranList;
-      }
       stok = json.stok;
       riwayat = json.riwayat || [];
-      
-      // Migrasi format lama
+
       Object.keys(stok).forEach(function(key) {
         var item = stok[key];
         if (!item.stok) {
@@ -966,11 +977,11 @@ async function ambilDariCloud() {
           if (typeof item.stok.wage[u] !== 'number') item.stok.wage[u] = 0;
         });
       });
-      
+
       localStorage.setItem('ukuranList_v3', JSON.stringify(ukuranList));
       localStorage.setItem('stok_v3', JSON.stringify(stok));
       localStorage.setItem('riwayat_v3', JSON.stringify(riwayat));
-      
+
       render();
       updateStatusCloud('ok');
     } else {
