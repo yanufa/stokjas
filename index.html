@@ -659,6 +659,7 @@ var TAB_KARYAWAN = ['stok', 'masuk', 'keluar'];
 function setupModeKaryawan() {
   isAdmin = false;
   localStorage.removeItem('stokjas_admin');
+  localStorage.removeItem('stokjas_admin');
   document.body.classList.add('mode-karyawan');
   
   // Update badge
@@ -901,6 +902,7 @@ function simpan() {
   localStorage.setItem('ukuranList_v3', JSON.stringify(ukuranList));
   localStorage.setItem('stok_v3', JSON.stringify(stok));
   localStorage.setItem('riwayat_v3', JSON.stringify(riwayat));
+  localStorage.setItem('lastUpdate_v3', Date.now().toString());
 
   if (SYNC_ENABLED && navigator.onLine) {
     clearTimeout(syncTimer);
@@ -914,7 +916,10 @@ async function kirimKeCloud() {
     const formData = new URLSearchParams();
     formData.append('token', API_TOKEN);
     formData.append('action', 'saveAll');
-    formData.append('data', JSON.stringify({ ukuranList, stok, riwayat }));
+    formData.append('data', JSON.stringify({
+      ukuranList, stok, riwayat,
+      lastUpdate: parseInt(localStorage.getItem('lastUpdate_v3') || '0')
+    }));
 
     const res = await fetch(API_URL, { method: 'POST', body: formData });
     const json = await res.json();
@@ -938,43 +943,46 @@ async function ambilDariCloud() {
       return;
     }
 
-    // Cek apakah lokal sudah ada data
-    var lokalAdaData = (stok && Object.keys(stok).length > 0) || (riwayat && riwayat.length > 0);
+    var lokalTime = parseInt(localStorage.getItem('lastUpdate_v3') || '0');
+    var cloudTime = parseInt(json.lastUpdate || '0');
 
-    if (lokalAdaData) {
-      // Lokal sudah ada data → JANGAN timpa, kirim ulang ke cloud
-      console.log('ℹ️ Lokal ada data, skip pull. Push ke cloud...');
-      await kirimKeCloud();
-      updateStatusCloud('ok');
-      return;
-    }
-
-    // Lokal kosong → baru ambil dari cloud
-    if (json.ukuranList && json.ukuranList.length > 0) {
-      ukuranList = json.ukuranList;
-    }
-    if (json.stok && Object.keys(json.stok).length > 0) {
-      stok = json.stok;
-      riwayat = json.riwayat || [];
-      Object.keys(stok).forEach(function(key) {
-        var item = stok[key];
-        if (!item.stok) {
-          item.stok = { langen: item.sizes || {}, wage: {} };
-          delete item.sizes;
-        }
-        if (!item.stok.langen) item.stok.langen = {};
-        if (!item.stok.wage) item.stok.wage = {};
-        ukuranList.forEach(function(u) {
-          if (typeof item.stok.langen[u] !== 'number') item.stok.langen[u] = 0;
-          if (typeof item.stok.wage[u] !== 'number') item.stok.wage[u] = 0;
+    // Cloud lebih baru → TARIK dari cloud (timpa lokal)
+    if (cloudTime > lokalTime) {
+      console.log('⬇️ Cloud lebih baru, tarik dari cloud...');
+      if (json.ukuranList && json.ukuranList.length > 0) {
+        ukuranList = json.ukuranList;
+      }
+      if (json.stok) {
+        stok = json.stok;
+        riwayat = json.riwayat || [];
+        Object.keys(stok).forEach(function(key) {
+          var item = stok[key];
+          if (!item.stok) {
+            item.stok = { langen: item.sizes || {}, wage: {} };
+            delete item.sizes;
+          }
+          if (!item.stok.langen) item.stok.langen = {};
+          if (!item.stok.wage) item.stok.wage = {};
+          ukuranList.forEach(function(u) {
+            if (typeof item.stok.langen[u] !== 'number') item.stok.langen[u] = 0;
+            if (typeof item.stok.wage[u] !== 'number') item.stok.wage[u] = 0;
+          });
         });
-      });
-      localStorage.setItem('ukuranList_v3', JSON.stringify(ukuranList));
-      localStorage.setItem('stok_v3', JSON.stringify(stok));
-      localStorage.setItem('riwayat_v3', JSON.stringify(riwayat));
-      render();
+        localStorage.setItem('ukuranList_v3', JSON.stringify(ukuranList));
+        localStorage.setItem('stok_v3', JSON.stringify(stok));
+        localStorage.setItem('riwayat_v3', JSON.stringify(riwayat));
+        localStorage.setItem('lastUpdate_v3', cloudTime.toString());
+        render();
+      }
       updateStatusCloud('ok');
-    } else {
+    }
+    // Lokal lebih baru → KIRIM ke cloud
+    else if (lokalTime > cloudTime) {
+      console.log('⬆️ Lokal lebih baru, kirim ke cloud...');
+      await kirimKeCloud();
+    }
+    // Sama → tidak ada yang perlu dilakukan
+    else {
       updateStatusCloud('ok');
     }
   } catch (err) {
@@ -1597,6 +1605,18 @@ function restoreJSON(event) {
 // RENDER SEMUA
 // ==========================================
 function render() {
+// Pastikan mode tetap konsisten
+if (localStorage.getItem('stokjas_admin') === '1') {
+  document.body.classList.remove('mode-karyawan');
+  document.querySelectorAll('.admin-only').forEach(function(el) {
+    el.style.display = '';
+  });
+} else {
+  document.body.classList.add('mode-karyawan');
+  document.querySelectorAll('.admin-only').forEach(function(el) {
+    el.style.display = 'none';
+  });
+}
   renderModelFilterBar();
   renderStokView();
   renderRingkasanPerUkuran();
