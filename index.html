@@ -902,7 +902,6 @@ function simpan() {
   localStorage.setItem('ukuranList_v3', JSON.stringify(ukuranList));
   localStorage.setItem('stok_v3', JSON.stringify(stok));
   localStorage.setItem('riwayat_v3', JSON.stringify(riwayat));
-  localStorage.setItem('lastUpdate_v3', Date.now().toString());
 
   if (SYNC_ENABLED && navigator.onLine) {
     clearTimeout(syncTimer);
@@ -943,46 +942,38 @@ async function ambilDariCloud() {
       return;
     }
 
-    var lokalTime = parseInt(localStorage.getItem('lastUpdate_v3') || '0');
-    var cloudTime = parseInt(json.lastUpdate || '0');
-
-    // Cloud lebih baru → TARIK dari cloud (timpa lokal)
-    if (cloudTime > lokalTime) {
-      console.log('⬇️ Cloud lebih baru, tarik dari cloud...');
+    // CLOUD SELALU MENANG — kalau cloud punya data, tarik & timpa lokal
+    if (json.stok && Object.keys(json.stok).length > 0) {
+      console.log('⬇️ Tarik dari cloud (cloud menang)');
+      
       if (json.ukuranList && json.ukuranList.length > 0) {
         ukuranList = json.ukuranList;
       }
-      if (json.stok) {
-        stok = json.stok;
-        riwayat = json.riwayat || [];
-        Object.keys(stok).forEach(function(key) {
-          var item = stok[key];
-          if (!item.stok) {
-            item.stok = { langen: item.sizes || {}, wage: {} };
-            delete item.sizes;
-          }
-          if (!item.stok.langen) item.stok.langen = {};
-          if (!item.stok.wage) item.stok.wage = {};
-          ukuranList.forEach(function(u) {
-            if (typeof item.stok.langen[u] !== 'number') item.stok.langen[u] = 0;
-            if (typeof item.stok.wage[u] !== 'number') item.stok.wage[u] = 0;
-          });
+      stok = json.stok;
+      riwayat = json.riwayat || [];
+      
+      // Migrasi format lama
+      Object.keys(stok).forEach(function(key) {
+        var item = stok[key];
+        if (!item.stok) {
+          item.stok = { langen: item.sizes || {}, wage: {} };
+          delete item.sizes;
+        }
+        if (!item.stok.langen) item.stok.langen = {};
+        if (!item.stok.wage) item.stok.wage = {};
+        ukuranList.forEach(function(u) {
+          if (typeof item.stok.langen[u] !== 'number') item.stok.langen[u] = 0;
+          if (typeof item.stok.wage[u] !== 'number') item.stok.wage[u] = 0;
         });
-        localStorage.setItem('ukuranList_v3', JSON.stringify(ukuranList));
-        localStorage.setItem('stok_v3', JSON.stringify(stok));
-        localStorage.setItem('riwayat_v3', JSON.stringify(riwayat));
-        localStorage.setItem('lastUpdate_v3', cloudTime.toString());
-        render();
-      }
+      });
+      
+      localStorage.setItem('ukuranList_v3', JSON.stringify(ukuranList));
+      localStorage.setItem('stok_v3', JSON.stringify(stok));
+      localStorage.setItem('riwayat_v3', JSON.stringify(riwayat));
+      
+      render();
       updateStatusCloud('ok');
-    }
-    // Lokal lebih baru → KIRIM ke cloud
-    else if (lokalTime > cloudTime) {
-      console.log('⬆️ Lokal lebih baru, kirim ke cloud...');
-      await kirimKeCloud();
-    }
-    // Sama → tidak ada yang perlu dilakukan
-    else {
+    } else {
       updateStatusCloud('ok');
     }
   } catch (err) {
