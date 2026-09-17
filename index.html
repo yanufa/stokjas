@@ -2319,7 +2319,7 @@ function setFilterModel(model) {
   renderRingkasanPerUkuran();   // <-- TAMBAH INI
   renderModelFilterBar();
 }
-/ Auto-pull dari cloud tiap 5 detik
+// Auto-pull dari cloud tiap 5 detik
 setInterval(function() {
   if (navigator.onLine && !document.hidden) ambilDariCloud();
 }, 5000);
