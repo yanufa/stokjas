@@ -464,6 +464,7 @@ h1, h2, h3, h4, th, label,
 
       <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
         <button class="primary blue" onclick="cfHitungSelisih()" style="flex:1;">🔍 Hitung Selisih</button>
+        <button class="primary orange" onclick="cfKoreksiStok()" style="flex:1;">✏️ Koreksi Stok</button>
         <button class="primary" onclick="cfReset()" style="flex:1; background:#95a5a6;">🔄 Reset</button>
         <button class="primary blue" onclick="cfExportCSV()" style="flex:1; background:#8e44ad;">📤 Export CSV</button>
       </div>
@@ -658,7 +659,6 @@ var TAB_KARYAWAN = ['stok', 'masuk', 'keluar'];
 
 function setupModeKaryawan() {
   isAdmin = false;
-  localStorage.removeItem('stokjas_admin');
   localStorage.removeItem('stokjas_admin');
   document.body.classList.add('mode-karyawan');
   
