@@ -1219,10 +1219,11 @@ if (filterModelAktif !== 'semua') {
         else if (total <= 3) cls = 'segera';
         else if (total <= 10) cls = 'rendah';
 
-        chips += '<div class="size-chip ' + cls + '" style="flex-direction:column; align-items:flex-start; gap:2px;">';
-        chips += '<b>' + u + '</b> <span style="color:#2c3e50; font-weight:700;">' + total + '</span>';
-        chips += '<small style="font-size:10px; color:#666;">L:' + l + ' · W:' + w + '</small>';
-        chips += '</div>';
+        chips += '<div class="size-chip ' + cls + '" style="flex-direction:row; align-items:center; justify-content:space-between; gap:8px;">';
+chips += '<b>' + u + '</b>';
+chips += '<span>' + total + '</span>';
+chips += '<small>L:' + l + '·W:' + w + '</small>';
+chips += '</div>';
       });
 
       html += '<div class="warna-row">';
