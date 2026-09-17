@@ -2319,6 +2319,16 @@ function setFilterModel(model) {
   renderRingkasanPerUkuran();   // <-- TAMBAH INI
   renderModelFilterBar();
 }
+/ Auto-pull dari cloud tiap 5 detik
+setInterval(function() {
+  if (navigator.onLine && !document.hidden) ambilDariCloud();
+}, 5000);
+
+// Pull saat tab dibuka kembali
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden && navigator.onLine) ambilDariCloud();
+});
+
 </script>
 </div>
 </body>
