@@ -2,7 +2,7 @@
   "name": "Stok Jas Yanufa",
   "short_name": "Stok Jas",
   "description": "Aplikasi Stok Jas Yanufa - Langen & Wage",
-  "start_url": "./index2.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
