@@ -285,6 +285,90 @@ h1, h2, h3, h4, th, label,
 .model-filter-btn.active {
   background: #2c3e50; color: white;
 }
+/* ==========================================
+   TAB KAIN
+   ========================================== */
+.kain-baris {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+.kain-baris select,
+.kain-baris input {
+  width: 100%;
+}
+.kain-baris .btn-hapus-baris {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+}
+.kain-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.kain-table th {
+  background: #34495e;
+  color: white;
+  padding: 8px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+}
+.kain-table td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+.kain-table tr:hover td {
+  background: #f9f9f9;
+}
+.kain-table .yard-cell {
+  color: #e74c3c;
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-align: right;
+}
+.kain-table .prod-cell {
+  color: #27ae60;
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-align: right;
+}
+.kain-table .date-cell {
+  font-size: 12px;
+  color: #666;
+}
+.kain-table .warna-cell {
+  font-weight: 700;
+  color: #8e44ad;
+}
+@media (max-width: 600px) {
+  .kain-baris {
+    grid-template-columns: 1fr 1fr auto;
+    gap: 4px;
+  }
+  .kain-baris select,
+  .kain-baris input {
+    font-size: 13px;
+    padding: 8px 6px;
+  }
+  .kain-table th,
+  .kain-table td {
+    padding: 6px 4px;
+    font-size: 12px;
+  }
+  .kain-table .yard-cell,
+  .kain-table .prod-cell {
+    font-size: 1rem;
+  }
+}
 </style>
 <!-- ================= MODE BADGE (KIRI ATAS) ================= -->
 <div id="modeBadge" class="mode-badge-karyawan">👨‍🏭 Mode Karyawan</div>
@@ -333,6 +417,7 @@ h1, h2, h3, h4, th, label,
     <button class="tab-btn" onclick="showTab('keluar', this)">⬆️ Keluar</button>
     <button class="tab-btn admin-only" onclick="showTab('riwayat', this)">📜 Riwayat</button>
     <button class="tab-btn admin-only" onclick="showTab('setting', this)">⚙️ Setting</button>
+    <button class="tab-btn admin-only" onclick="showTab('kain', this)">🧵 Kain</button>
   </div>
 
   <!-- ================= TAB STOK ================= -->
@@ -529,6 +614,63 @@ h1, h2, h3, h4, th, label,
   </div>
 </div>
   
+  <!-- ================= TAB KAIN ================= -->
+<div id="kain" class="tab-content">
+  <div class="card">
+    <h3>🧵 Catatan Pengiriman Kain</h3>
+    <div class="info-baris">
+      💡 Catat kain yang dikirim ke gudang. Satu kali kirim bisa banyak warna.
+    </div>
+
+    <div class="row">
+      <div class="form-group">
+        <label>Tanggal Kirim</label>
+        <input type="date" id="kainTanggal">
+      </div>
+      <div class="form-group">
+        <label>Gudang Tujuan</label>
+        <select id="kainGudang" class="besar">
+          <option value="langen">🏭 Langen</option>
+          <option value="wage">🏭 Wage</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Daftar Warna & Panjang (Yard)</label>
+      <div id="kainWarnaList"></div>
+      <button class="primary blue" type="button" onclick="kainTambahBaris()" style="margin-top:8px; padding:10px;">
+        ➕ Tambah Warna
+      </button>
+    </div>
+
+    <div id="msgKain" class="msg"></div>
+
+    <button class="primary" onclick="kainSimpan()" style="margin-top:12px;">
+      💾 Simpan Pengiriman Kain
+    </button>
+  </div>
+
+  <div class="card">
+    <h3>📋 Riwayat Pengiriman Kain</h3>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+      <span style="align-self:center; font-size:13px; color:#666;">Gudang:</span>
+      <button class="filter-btn active" onclick="kainSetGudang('langen', this)">🏭 Langen</button>
+      <button class="filter-btn" onclick="kainSetGudang('wage', this)">🏭 Wage</button>
+    </div>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+      <span style="align-self:center; font-size:13px; color:#666;">Periode:</span>
+      <button class="filter-btn" onclick="kainSetPeriode('7', this)">7 Hari</button>
+      <button class="filter-btn active" onclick="kainSetPeriode('30', this)">30 Hari</button>
+      <button class="filter-btn" onclick="kainSetPeriode('semua', this)">Semua</button>
+    </div>
+
+    <div id="kainTabelWrap"></div>
+  </div>
+</div>
+
   <!-- ================= TAB SETTING ================= -->
   <div id="setting" class="tab-content">
     <div class="card">
@@ -942,21 +1084,7 @@ async function ambilDariCloud() {
       return;
     }
 
-    // Cek apakah data cloud BEDA dengan lokal
-    var cloudStokStr = JSON.stringify(json.stok || {});
-    var cloudRiwayatStr = JSON.stringify(json.riwayat || []);
-    var lokalStokStr = JSON.stringify(stok);
-    var lokalRiwayatStr = JSON.stringify(riwayat);
-
-    var adaBeda = (cloudStokStr !== lokalStokStr) || (cloudRiwayatStr !== lokalRiwayatStr);
-
-    // Kalau SAMA → tidak perlu render, cukup badge hijau
-    if (!adaBeda) {
-      updateStatusCloud('ok');
-      return;
-    }
-
-    // Kalau BEDA → timpa & render
+    // Cloud selalu menang — timpa lokal
     if (json.ukuranList && json.ukuranList.length > 0) {
       ukuranList = json.ukuranList;
     }
@@ -1017,7 +1145,6 @@ function updateStatusCloud(status, pesan) {
     setTimeout(() => { el.style.opacity = '0.5'; }, 2000);
   }
 }
-
 // ==========================================
 // HELPER
 // ==========================================
@@ -1253,42 +1380,63 @@ function renderRiwayat() {
   tb.innerHTML = riwayat.slice(0, 200).map(function(r) {
     var gudangLabel = r.gudang === 'wage' ? '🏭 Wage' : '🏭 Langen';
     var gudangBg = r.gudang === 'wage' ? '#9b59b6' : '#3498db';
-    
-   // Tentukan jenis label & warna
-var jenisLabel = '';
-var jenisBg = '';
-if (r.jenis === 'Masuk') {
-  if (r.jenisDetail === 'retur') {
-    jenisLabel = '🔄 Retur';
-    jenisBg = '#f39c12';  // orange
-  } else {
-    jenisLabel = '🏭 Produksi';
-    jenisBg = '#27ae60';  // hijau
-  }
-} else if (r.jenis === 'Koreksi') {
-  jenisLabel = '✏️ Koreksi';
-  jenisBg = '#8e44ad';  // ungu
-} else {
-  jenisLabel = '⬆️ Keluar';
-  jenisBg = '#e74c3c';  // merah
-}
-    
+
+    // Tentukan jenis label & warna
+    var jenisLabel = '';
+    var jenisBg = '';
+    if (r.jenis === 'Masuk') {
+      if (r.jenisDetail === 'retur') {
+        jenisLabel = '🔄 Retur';
+        jenisBg = '#f39c12';
+      } else {
+        jenisLabel = '🏭 Produksi';
+        jenisBg = '#27ae60';
+      }
+    } else if (r.jenis === 'Koreksi') {
+      jenisLabel = '✏️ Koreksi';
+      jenisBg = '#8e44ad';
+    } else if (r.jenis === 'Kain') {
+      jenisLabel = '🧵 Kain';
+      jenisBg = '#16a085';
+    } else if (r.jenis === 'Selisih') {
+      jenisLabel = '⚠️ Selisih';
+      jenisBg = '#e67e22';
+    } else {
+      jenisLabel = '⬆️ Keluar';
+      jenisBg = '#e74c3c';
+    }
+
+    // Untuk Kain: kolom Model & Ukuran → '-'
+    var modelCell = r.jenis === 'Kain' ? '<small style="color:#999;">—</small>' : '<span class="kode-badge">' + (r.model || '-') + '</span>';
+    var ukuranCell = r.jenis === 'Kain' ? '<small style="color:#999;">—</small>' : (r.ukuran || '-');
+
+    // Untuk Qty
+    var qtyText = '';
+    if (r.jenis === 'Kain') {
+      qtyText = '<span style="color:#16a085; font-weight:800;">' + (r.yard || 0) + ' yd</span>';
+    } else if (r.jenis === 'Masuk') {
+      qtyText = '<strong>+' + (r.jumlah || 0) + '</strong>';
+    } else if (r.jenis === 'Koreksi') {
+      var tanda = (r.selisih > 0) ? '+' : '-';
+      qtyText = '<strong>' + tanda + (r.jumlah || 0) + '</strong>';
+    } else if (r.jenis === 'Selisih') {
+      var tandaS = (r.selisih > 0) ? '+' : '-';
+      qtyText = '<strong>' + tandaS + (r.jumlah || 0) + '</strong>';
+    } else {
+      qtyText = '<strong>-' + (r.jumlah || 0) + '</strong>';
+    }
+
     return '<tr>' +
       '<td><small>' + r.waktu + '</small></td>' +
-      '<td><span class="kode-badge">' + r.model + '</span></td>' +
-      '<td><span class="warna-badge">' + r.warna + '</span></td>' +
-      '<td>' + r.ukuran + '</td>' +
+      '<td>' + modelCell + '</td>' +
+      '<td><span class="warna-badge">' + (r.warna || '-') + '</span></td>' +
+      '<td>' + ukuranCell + '</td>' +
       '<td><span style="background:' + gudangBg + '; color:white; padding:2px 6px; border-radius:4px; font-size:11px;">' + gudangLabel + '</span></td>' +
       '<td><span style="background:' + jenisBg + '; color:white; padding:3px 8px; border-radius:20px; font-size:11px; font-weight:600;">' + jenisLabel + '</span></td>' +
-      '<td><strong>' + 
-  (r.jenis === 'Masuk' ? '+' : 
-   r.jenis === 'Koreksi' ? (r.selisih > 0 ? '+' : '-') : '-') + 
-  r.jumlah + 
-'</strong></td>' +
+      '<td>' + qtyText + '</td>' +
       '</tr>';
   }).join('');
 }
-
 // ==========================================
 // MASUK
 // ==========================================
@@ -1526,17 +1674,34 @@ function undoTransaksiTerakhir() {
     return;
   }
 
-  var konfirmasi = 'Batalkan transaksi terakhir?\n\n' +
-    '📦 Model: ' + last.model + '\n' +
-    '🎨 Warna: ' + last.warna + '\n' +
-    '📏 Ukuran: ' + last.ukuran + '\n' +
-    '🏭 Gudang: ' + (last.gudang === 'wage' ? 'Wage' : 'Langen') + '\n' +
-    '📊 Jenis: ' + (last.jenis === 'Masuk' ? (last.jenisDetail === 'retur' ? 'Retur' : 'Produksi') : 'Keluar') + '\n' +
-    '🔢 Jumlah: ' + last.jumlah + ' pcs\n\n' +
-    'Stok akan dikembalikan seperti sebelumnya.';
+  var konfirmasi = 'Batalkan transaksi terakhir?\n\n';
+  if (last.jenis === 'Kain') {
+    konfirmasi += '🧵 Kain: ' + last.warna + '\n' +
+      '📏 Yard: ' + (last.yard || 0) + '\n' +
+      '🏭 Gudang: ' + (last.gudang === 'wage' ? 'Wage' : 'Langen') + '\n\n' +
+      'Riwayat akan dihapus.';
+  } else {
+    konfirmasi += '📦 Model: ' + last.model + '\n' +
+      '🎨 Warna: ' + last.warna + '\n' +
+      '📏 Ukuran: ' + last.ukuran + '\n' +
+      '🏭 Gudang: ' + (last.gudang === 'wage' ? 'Wage' : 'Langen') + '\n' +
+      '📊 Jenis: ' + (last.jenis === 'Masuk' ? (last.jenisDetail === 'retur' ? 'Retur' : 'Produksi') : 'Keluar') + '\n' +
+      '🔢 Jumlah: ' + last.jumlah + ' pcs\n\n' +
+      'Stok akan dikembalikan seperti sebelumnya.';
+  }
 
   if (!confirm(konfirmasi)) return;
 
+  // KHUSUS KAIN: cuma hapus riwayat, tidak ada stok jas yang berubah
+  if (last.jenis === 'Kain') {
+    riwayat.shift();
+    simpan();
+    render();
+    showMsg('msgUndo', '✅ Riwayat kain ' + last.warna + ' ' + (last.yard || 0) + ' yard dihapus.', 'success');
+    return;
+  }
+
+  // Untuk Masuk / Keluar / Koreksi / Selisih
   var key = keyOf(last.model, last.warna);
   var item = stok[key];
 
@@ -1548,23 +1713,22 @@ function undoTransaksiTerakhir() {
   var gudang = last.gudang || 'langen';
   var current = getStok(item, gudang, last.ukuran);
 
-  // Kembalikan stok: kalau Masuk → kurangi, kalau Keluar → tambah
   if (last.jenis === 'Masuk') {
     if (current < last.jumlah) {
       showMsg('msgUndo', '⚠️ Stok tidak cukup untuk dibatalkan (sudah berkurang). Sisa: ' + current + ' pcs.', 'error');
       return;
     }
     setStok(item, gudang, last.ukuran, current - last.jumlah);
-  } else {
+  } else if (last.jenis === 'Keluar') {
     setStok(item, gudang, last.ukuran, current + last.jumlah);
+  } else {
+    showMsg('msgUndo', '❌ Jenis transaksi "' + last.jenis + '" tidak bisa di-undo.', 'error');
+    return;
   }
 
-  // Hapus dari riwayat
-  riwayat.shift(); // hapus elemen pertama
-
+  riwayat.shift();
   simpan();
   render();
-  
   showMsg('msgUndo', '✅ Transaksi ' + last.model + ' - ' + last.warna + ' - ' + last.ukuran + ' berhasil dibatalkan.', 'success');
 }
 // ==========================================
@@ -1621,6 +1785,7 @@ if (localStorage.getItem('stokjas_admin') === '1') {
   });
 }
   renderModelFilterBar();
+  kainInitForm();
   renderStokView();
   renderRingkasanPerUkuran();
   renderRiwayat();
@@ -2331,7 +2496,291 @@ function setFilterModel(model) {
   renderModelFilterBar();
 }
 
+// ==========================================
+// TAB KAIN - TAHAP 3: Form Tambah Warna
+// ==========================================
+var kainGudangAktif = 'langen';
+var kainPeriodeAktif = '30';
 
+// Daftar warna KC6 — otomatis ambil dari stok
+function kainGetWarnaList() {
+  var warnaSet = new Set();
+  Object.values(stok).forEach(function(item) {
+    if (item.model === 'KC6' && item.warna) {
+      warnaSet.add(item.warna);
+    }
+  });
+  return Array.from(warnaSet).sort();
+}
+
+// Render 1 baris form warna
+function kainBuatBaris(warna, yard) {
+  var warnaList = kainGetWarnaList();
+  var optWarna = '<option value="">-- Pilih Warna --</option>';
+  warnaList.forEach(function(w) {
+    var sel = (w === warna) ? ' selected' : '';
+    optWarna += '<option value="' + w + '"' + sel + '>' + w + '</option>';
+  });
+
+  var div = document.createElement('div');
+  div.className = 'kain-baris';
+  div.innerHTML =
+    '<select class="kain-warna">' + optWarna + '</select>' +
+    '<input type="number" class="kain-yard" placeholder="Yard" min="0" value="' + (yard || '') + '">' +
+    '<button type="button" class="btn-hapus-baris" onclick="kainHapusBaris(this)">🗑️</button>';
+  return div;
+}
+
+// Tambah baris baru
+function kainTambahBaris() {
+  var list = document.getElementById('kainWarnaList');
+  if (!list) return;
+  list.appendChild(kainBuatBaris());
+}
+
+// Hapus baris
+function kainHapusBaris(btn) {
+  var baris = btn.parentElement;
+  var list = document.getElementById('kainWarnaList');
+  if (list.children.length <= 1) {
+    alert('Minimal harus ada 1 baris warna.');
+    return;
+  }
+  baris.remove();
+}
+
+// Set tanggal default hari ini
+function kainSetTanggalDefault() {
+  var inp = document.getElementById('kainTanggal');
+  if (!inp) return;
+  if (!inp.value) {
+    var now = new Date();
+    var yyyy = now.getFullYear();
+    var mm = String(now.getMonth() + 1).padStart(2, '0');
+    var dd = String(now.getDate()).padStart(2, '0');
+    inp.value = yyyy + '-' + mm + '-' + dd;
+  }
+}
+
+// Init form kain saat tab dibuka
+function kainInitForm() {
+  var list = document.getElementById('kainWarnaList');
+  if (!list) return;
+  if (list.children.length === 0) {
+    // Tambah 1 baris default
+    list.appendChild(kainBuatBaris());
+  }
+  kainSetTanggalDefault();
+}
+// ==========================================
+// TAB KAIN - TAHAP 4: Simpan Pengiriman
+// ==========================================
+function kainSetGudang(g, btn) {
+  kainGudangAktif = g;
+  var parent = btn.parentElement;
+  parent.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  kainRenderTabel();
+}
+
+function kainSetPeriode(p, btn) {
+  kainPeriodeAktif = p;
+  var parent = btn.parentElement;
+  parent.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  kainRenderTabel();
+}
+
+function kainSimpan() {
+  var tanggal = document.getElementById('kainTanggal').value;
+  var gudang = document.getElementById('kainGudang').value;
+
+  if (!tanggal) return showMsg('msgKain', '❌ Tanggal belum diisi!', 'error');
+  if (!gudang) return showMsg('msgKain', '❌ Gudang belum dipilih!', 'error');
+
+  // Ambil semua baris warna
+  var barisEls = document.querySelectorAll('#kainWarnaList .kain-baris');
+  if (barisEls.length === 0) return showMsg('msgKain', '❌ Minimal isi 1 warna!', 'error');
+
+  var dataKirim = [];
+  var adaError = false;
+
+  barisEls.forEach(function(b) {
+    var warna = b.querySelector('.kain-warna').value.trim();
+    var yard = parseFloat(b.querySelector('.kain-yard').value) || 0;
+
+    // Skip baris kosong (warna belum dipilih & yard 0)
+    if (!warna && yard === 0) return;
+
+    if (!warna) {
+      showMsg('msgKain', '❌ Ada warna yang belum dipilih!', 'error');
+      adaError = true;
+      return;
+    }
+    if (yard <= 0) {
+      showMsg('msgKain', '❌ Panjang yard harus lebih dari 0!', 'error');
+      adaError = true;
+      return;
+    }
+    dataKirim.push({ warna: warna, yard: yard });
+  });
+
+  if (adaError) return;
+  if (dataKirim.length === 0) return showMsg('msgKain', '❌ Tidak ada data yang diisi!', 'error');
+
+  // Format tanggal DD/MM/YYYY
+  var parts = tanggal.split('-');
+  var tglFmt = parts[2] + '/' + parts[1] + '/' + parts[0];
+
+  var waktu = new Date().toLocaleString('id-ID');
+
+  // Simpan ke riwayat
+  dataKirim.forEach(function(d) {
+    riwayat.unshift({
+      waktu: waktu,
+      tanggal: tglFmt,
+      jenis: 'Kain',
+      jenisDetail: 'kirim',
+      gudang: gudang,
+      warna: d.warna,
+      yard: d.yard,
+      ket: '-'
+    });
+  });
+
+  simpan();
+
+  // Reset form
+  var list = document.getElementById('kainWarnaList');
+  list.innerHTML = '';
+  list.appendChild(kainBuatBaris());
+  kainSetTanggalDefault();
+
+  var totalYard = dataKirim.reduce(function(a, b) { return a + b.yard; }, 0);
+  showMsg('msgKain', '✅ Tersimpan: ' + dataKirim.length + ' warna, total ' + totalYard + ' yard ke ' + GUDANG_LABEL[gudang], 'success');
+
+  kainRenderTabel();
+}
+// ==========================================
+// TAB KAIN - TAHAP 5: Render Tabel
+// ==========================================
+function kainRenderTabel() {
+  var wrap = document.getElementById('kainTabelWrap');
+  if (!wrap) return;
+
+  var dataKain = riwayat.filter(function(r) {
+    return r.jenis === 'Kain' && r.gudang === kainGudangAktif;
+  });
+
+  var dataFiltered = dataKain;
+  if (kainPeriodeAktif !== 'semua') {
+    var hari = parseInt(kainPeriodeAktif);
+    var batas = new Date();
+    batas.setDate(batas.getDate() - hari);
+    dataFiltered = dataKain.filter(function(r) {
+      var tgl = parseWaktu(r.waktu);
+      if (!tgl) return false;
+      return tgl >= batas;
+    });
+  }
+
+  if (dataFiltered.length === 0) {
+    wrap.innerHTML = '<div class="empty">Belum ada pengiriman kain di gudang ' + GUDANG_LABEL[kainGudangAktif] + '.</div>';
+    return;
+  }
+
+  var grouped = {};
+  dataFiltered.forEach(function(r) {
+    var tgl = r.tanggal || (parseWaktu(r.waktu) ? parseWaktu(r.waktu).toLocaleDateString('id-ID') : '?');
+    var key = tgl + '||' + r.warna;
+    if (!grouped[key]) {
+      grouped[key] = {
+        tanggal: tgl,
+        waktu: r.waktu,
+        warna: r.warna,
+        yard: 0
+      };
+    }
+    grouped[key].yard += r.yard || 0;
+  });
+
+  var list = Object.values(grouped);
+  list.sort(function(a, b) {
+    var ta = parseWaktu(a.waktu);
+    var tb = parseWaktu(b.waktu);
+    if (!ta || !tb) return 0;
+    return tb - ta;
+  });
+
+  var html = '<div style="overflow-x:auto;"><table class="kain-table"><thead><tr>' +
+    '<th>Tanggal</th><th>Warna</th><th style="text-align:right;">Panjang (Yard)</th><th style="text-align:right;">Prod (pcs)</th>' +
+    '</tr></thead><tbody>';
+
+  list.forEach(function(item) {
+    var prod = kainHitungProd(item.warna, item.tanggal);
+    html += '<tr>';
+    html += '<td class="date-cell">' + item.tanggal + '</td>';
+    html += '<td class="warna-cell">' + item.warna + '</td>';
+    html += '<td class="yard-cell">' + item.yard + '</td>';
+    html += '<td class="prod-cell">' + prod + '</td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+
+  var totalYard = list.reduce(function(a, b) { return a + b.yard; }, 0);
+  var totalProd = 0;
+  list.forEach(function(item) {
+    totalProd += kainHitungProd(item.warna, item.tanggal);
+  });
+
+  html += '<div style="margin-top:12px; padding:12px; background:#f8f9fa; border-radius:8px;">';
+  html += '<strong>Total ' + GUDANG_LABEL[kainGudangAktif] + ':</strong> ';
+  html += totalYard + ' yard · ' + totalProd + ' pcs';
+  html += '</div>';
+
+  wrap.innerHTML = html;
+}
+
+function kainHitungProd(warna, tanggalKirim) {
+  var tglKirim = parseWaktu(tanggalKirim);
+  if (!tglKirim) return 0;
+
+  var kirimanBerikutnya = null;
+  riwayat.forEach(function(r) {
+    if (r.jenis !== 'Kain') return;
+    if (r.gudang !== kainGudangAktif) return;
+    if (r.warna !== warna) return;
+
+    var tglR = parseWaktu(r.waktu);
+    if (!tglR) return;
+
+    if (tglR > tglKirim) {
+      if (!kirimanBerikutnya || tglR < kirimanBerikutnya) {
+        kirimanBerikutnya = tglR;
+      }
+    }
+  });
+
+  var batasAkhir = kirimanBerikutnya || new Date();
+
+  var total = 0;
+  riwayat.forEach(function(r) {
+    if (r.jenis !== 'Masuk') return;
+    if (r.jenisDetail !== 'produksi') return;
+    if (r.gudang !== kainGudangAktif) return;
+    if (r.warna !== warna) return;
+
+    var tglR = parseWaktu(r.waktu);
+    if (!tglR) return;
+
+    if (tglR >= tglKirim && tglR < batasAkhir) {
+      total += r.jumlah || 0;
+    }
+  });
+
+  return total;
+}
 </script>
 </div>
 </body>
