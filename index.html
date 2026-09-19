@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stok Jas Yanufa</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2c3e50">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
   body { background: #f0f2f5; padding: 15px; color: #333; }
@@ -2780,6 +2782,12 @@ function kainHitungProd(warna, tanggalKirim) {
   });
 
   return total;
+}
+// Register Service Worker (PWA)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js')
+    .then(function() { console.log('✅ Service Worker terdaftar'); })
+    .catch(function(err) { console.error('❌ SW gagal:', err); });
 }
 </script>
 </div>
